@@ -128,4 +128,20 @@ object ApiService {
         }
         return response.body()
     }
+
+    // ==================== CHAT ====================
+
+    suspend fun getChatSessions(): List<ChatSessionDto> {
+        val response = client.get("$baseUrl/chats") { auth() }
+        return response.body()
+    }
+
+    suspend fun getChatMessages(sessionId: Long): List<ChatMessageDto> {
+        val response = client.get("$baseUrl/chats/$sessionId/messages") { auth() }
+        return response.body()
+    }
+
+    suspend fun markMessagesAsRead(sessionId: Long) {
+        client.post("$baseUrl/chats/$sessionId/read") { auth() }
+    }
 }

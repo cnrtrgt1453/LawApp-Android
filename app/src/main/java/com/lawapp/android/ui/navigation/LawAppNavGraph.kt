@@ -19,6 +19,7 @@ import com.lawapp.android.ui.auth.RoleSelectionScreen
 import com.lawapp.android.ui.client.*
 import com.lawapp.android.ui.lawyer.*
 import com.lawapp.android.ui.leads.CreateLeadScreen
+import com.lawapp.android.ui.chat.*
 
 // --- Route Tanımları ---
 object Routes {
@@ -34,6 +35,8 @@ object Routes {
     const val WALLET = "wallet"
     const val TEMPLATES = "templates"
     const val CREATE_LEAD = "create_lead"
+    const val CHAT_LIST = "chat_list"
+    const val CHAT_DETAIL = "chat_detail/{sessionId}/{partnerName}/{partnerRole}/{leadTitle}"
 }
 
 // --- Bottom Navigation Item ---
@@ -46,6 +49,7 @@ data class BottomNavItem(
 val lawyerBottomNavItems = listOf(
     BottomNavItem("İş Havuzu", Icons.Default.Search, Routes.LAWYER_HOME),
     BottomNavItem("Şablonlar", Icons.Default.Description, Routes.TEMPLATES),
+    BottomNavItem("Mesajlar", Icons.Default.Chat, Routes.CHAT_LIST),
     BottomNavItem("Cüzdan", Icons.Default.AccountBalanceWallet, Routes.WALLET),
     BottomNavItem("Profil", Icons.Default.Person, Routes.LAWYER_PROFILE)
 )
@@ -53,6 +57,7 @@ val lawyerBottomNavItems = listOf(
 val clientBottomNavItems = listOf(
     BottomNavItem("İlanlarım", Icons.Default.List, Routes.CLIENT_HOME),
     BottomNavItem("Yeni İlan", Icons.Default.Add, Routes.CREATE_LEAD),
+    BottomNavItem("Mesajlar", Icons.Default.Chat, Routes.CHAT_LIST),
     BottomNavItem("Profil", Icons.Default.Person, Routes.CLIENT_PROFILE)
 )
 
@@ -130,6 +135,56 @@ fun LawyerScaffold(navController: NavHostController) {
                     templates = uiTemplates,
                     onCreateTemplate = { title, content -> viewModel.createTemplate(title, content) },
                     onDeleteTemplate = { id -> viewModel.deleteTemplate(id) }
+                )
+            }
+            composable(Routes.CHAT_LIST) {
+                val chatViewModel: ChatViewModel = viewModel()
+                val sessions by chatViewModel.chatSessions.collectAsState()
+                val isLoading by chatViewModel.isLoading.collectAsState()
+
+                LaunchedEffect(Unit) {
+                    chatViewModel.fetchChatSessions()
+                }
+
+                ChatListScreen(
+                    sessions = sessions,
+                    isLoading = isLoading,
+                    onSessionClick = { session ->
+                        navController.navigate("chat_detail/${session.id}/${session.otherParticipantName}/${session.otherParticipantRole}/${session.leadTitle}")
+                    }
+                )
+            }
+            composable(
+                Routes.CHAT_DETAIL,
+                arguments = listOf(
+                    navArgument("sessionId") { type = NavType.LongType },
+                    navArgument("partnerName") { type = NavType.StringType },
+                    navArgument("partnerRole") { type = NavType.StringType },
+                    navArgument("leadTitle") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val sessionId = backStackEntry.arguments?.getLong("sessionId") ?: 0L
+                val partnerName = backStackEntry.arguments?.getString("partnerName") ?: ""
+                val partnerRole = backStackEntry.arguments?.getString("partnerRole") ?: ""
+                val leadTitle = backStackEntry.arguments?.getString("leadTitle") ?: ""
+
+                val chatViewModel: ChatViewModel = viewModel()
+                val messages by chatViewModel.activeMessages.collectAsState()
+
+                LaunchedEffect(sessionId) {
+                    chatViewModel.loadMessages(sessionId)
+                }
+
+                ChatDetailScreen(
+                    partnerName = partnerName,
+                    partnerRole = partnerRole,
+                    leadTitle = leadTitle,
+                    messages = messages,
+                    onSendMessage = { chatViewModel.sendMessage(it) },
+                    onBackClick = {
+                        chatViewModel.closeChat()
+                        navController.popBackStack()
+                    }
                 )
             }
             composable(Routes.WALLET) {
@@ -222,6 +277,56 @@ fun ClientScaffold(navController: NavHostController) {
                         navController.navigate(Routes.CLIENT_HOME) {
                             popUpTo(Routes.CLIENT_HOME) { inclusive = true }
                         }
+                    }
+                )
+            }
+            composable(Routes.CHAT_LIST) {
+                val chatViewModel: ChatViewModel = viewModel()
+                val sessions by chatViewModel.chatSessions.collectAsState()
+                val isLoading by chatViewModel.isLoading.collectAsState()
+
+                LaunchedEffect(Unit) {
+                    chatViewModel.fetchChatSessions()
+                }
+
+                ChatListScreen(
+                    sessions = sessions,
+                    isLoading = isLoading,
+                    onSessionClick = { session ->
+                        navController.navigate("chat_detail/${session.id}/${session.otherParticipantName}/${session.otherParticipantRole}/${session.leadTitle}")
+                    }
+                )
+            }
+            composable(
+                Routes.CHAT_DETAIL,
+                arguments = listOf(
+                    navArgument("sessionId") { type = NavType.LongType },
+                    navArgument("partnerName") { type = NavType.StringType },
+                    navArgument("partnerRole") { type = NavType.StringType },
+                    navArgument("leadTitle") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val sessionId = backStackEntry.arguments?.getLong("sessionId") ?: 0L
+                val partnerName = backStackEntry.arguments?.getString("partnerName") ?: ""
+                val partnerRole = backStackEntry.arguments?.getString("partnerRole") ?: ""
+                val leadTitle = backStackEntry.arguments?.getString("leadTitle") ?: ""
+
+                val chatViewModel: ChatViewModel = viewModel()
+                val messages by chatViewModel.activeMessages.collectAsState()
+
+                LaunchedEffect(sessionId) {
+                    chatViewModel.loadMessages(sessionId)
+                }
+
+                ChatDetailScreen(
+                    partnerName = partnerName,
+                    partnerRole = partnerRole,
+                    leadTitle = leadTitle,
+                    messages = messages,
+                    onSendMessage = { chatViewModel.sendMessage(it) },
+                    onBackClick = {
+                        chatViewModel.closeChat()
+                        navController.popBackStack()
                     }
                 )
             }
