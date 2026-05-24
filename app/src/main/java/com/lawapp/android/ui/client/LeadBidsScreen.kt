@@ -16,7 +16,10 @@ data class BidUI(
     val message: String,
     val date: String,
     val phoneNumber: String,
-    val status: String // "PENDING", "ACCEPTED", "REJECTED"
+    val status: String, // "PENDING", "ACCEPTED", "REJECTED"
+    val rating: Double = 5.0,
+    val specialties: List<String> = listOf("Genel Hukuk"),
+    val verified: Boolean = true
 )
 
 @Composable
@@ -38,17 +41,20 @@ fun LeadBidsScreen(
             color = MaterialTheme.colorScheme.primary
         )
         Text(
-            text = "Gelen Teklifler",
+            text = "Ön Görüşme Başvuruları",
             fontSize = 16.sp,
+            fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.secondary
         )
         
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         
         if (bids.isEmpty()) {
-            Text("Henüz bir teklif gelmedi. Beklemede kalın.", modifier = Modifier.padding(16.dp))
+            Text("Henüz bir ön görüşme başvurusu gelmedi. Beklemede kalın.", modifier = Modifier.padding(16.dp))
         } else {
-            LazyColumn {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 items(bids) { bid ->
                     BidItem(
                         bid = bid, 
@@ -65,13 +71,31 @@ fun LeadBidsScreen(
 fun BidItem(bid: BidUI, onAccept: () -> Unit, onContact: () -> Unit) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            .fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = "Avukat: ${bid.lawyerName}", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Column {
+                    Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                        Text(text = "Av. ${bid.lawyerName}", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        if (bid.verified) {
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "✓ Doğrulanmış",
+                                fontSize = 11.sp,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(2.dp))
+                    // Yıldız Puanı Gösterimi
+                    Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                        Text(text = "⭐ ${bid.rating}", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                }
+                
                 if (bid.status == "ACCEPTED") {
                     Text(text = "Kabul Edildi", color = androidx.compose.ui.graphics.Color(0xFF4CAF50), fontWeight = FontWeight.Bold)
                 } else if (bid.status == "REJECTED") {
@@ -80,15 +104,27 @@ fun BidItem(bid: BidUI, onAccept: () -> Unit, onContact: () -> Unit) {
             }
             
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = bid.message, fontSize = 15.sp)
+            
+            // Uzmanlık Alanları
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                bid.specialties.forEach { spec ->
+                    SuggestionChip(
+                        onClick = {},
+                        label = { Text(spec, fontSize = 10.sp) }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = bid.message, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(modifier = Modifier.height(16.dp))
             
             if (bid.status == "ACCEPTED") {
                 Text(
-                    text = "İletişim: ${bid.phoneNumber}",
+                    text = "🔒 Güvenli İletişim Hattı Aktif",
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 16.sp
+                    fontSize = 14.sp
                 )
                 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -97,7 +133,7 @@ fun BidItem(bid: BidUI, onAccept: () -> Unit, onContact: () -> Unit) {
                     onClick = onContact,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Hemen Ara")
+                    Text("Güvenli Sohbet / Ön Görüşmeyi Başlat")
                 }
             } else if (bid.status == "PENDING") {
                 Button(
@@ -105,7 +141,7 @@ fun BidItem(bid: BidUI, onAccept: () -> Unit, onContact: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
                 ) {
-                    Text("Teklifi Kabul Et")
+                    Text("Ön Görüşme Talebini Kabul Et")
                 }
             }
         }

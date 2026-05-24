@@ -35,10 +35,11 @@ data class CreateLeadRequest(
     val title: String,
     val description: String,
     val category: String,
-    val city: String
+    val city: String,
+    val wizardAnswersJson: String? = null // Akıllı sihirbaz sorularının JSON verileri
 )
 
-// --- Bid ---
+// --- Bid (Consultation Request) ---
 @Serializable
 data class BidDto(
     val id: Long = 0,
@@ -48,8 +49,12 @@ data class BidDto(
     val lawyer: UserSummary? = null
 )
 
+typealias ConsultationRequestDto = BidDto
+
 @Serializable
 data class PlaceBidRequest(val leadId: Long, val message: String)
+
+typealias PlaceConsultationRequest = PlaceBidRequest
 
 // --- User ---
 @Serializable
@@ -59,7 +64,10 @@ data class UserSummary(
     val email: String? = null,
     val phoneNumber: String? = null,
     val role: String? = null,
-    val verified: Boolean = false
+    val verified: Boolean = false,
+    val barLicenseImageUrl: String? = null,
+    val averageRating: Double? = 0.0,
+    val specialties: List<String>? = emptyList()
 )
 
 // --- Bid Template ---
