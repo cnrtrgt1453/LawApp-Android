@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.lawapp.android.data.TokenManager
 import com.lawapp.android.data.model.ChatMessageDto
 
-@OptIn(Material3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatDetailScreen(
     partnerName: String,

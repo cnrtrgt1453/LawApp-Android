@@ -60,6 +60,9 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
+    implementation(libs.androidx.material.icons.extended)
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
     
     // Ktor
