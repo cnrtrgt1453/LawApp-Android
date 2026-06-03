@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.lawapp.android.ui.lawyer.Lead
+import com.lawapp.android.ui.common.Lead
 
 @Composable
 fun ClientLeadsScreen(

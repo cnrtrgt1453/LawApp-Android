@@ -3,9 +3,11 @@ package com.lawapp.android.ui.client
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lawapp.android.data.ApiService
-import com.lawapp.android.data.model.BidDto
+import com.lawapp.android.data.model.AppointmentDto
+import com.lawapp.android.data.model.CalendarSlotDto
 import com.lawapp.android.data.model.CreateLeadRequest
 import com.lawapp.android.data.model.LeadDto
+import com.lawapp.android.data.model.LawyerDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -16,9 +18,17 @@ class ClientViewModel : ViewModel() {
     private val _myLeads = MutableStateFlow<List<LeadDto>>(emptyList())
     val myLeads: StateFlow<List<LeadDto>> = _myLeads
 
-    // --- Bids for a specific lead ---
-    private val _bids = MutableStateFlow<List<BidDto>>(emptyList())
-    val bids: StateFlow<List<BidDto>> = _bids
+    // --- Matching Lawyers ---
+    private val _matchingLawyers = MutableStateFlow<List<LawyerDto>>(emptyList())
+    val matchingLawyers: StateFlow<List<LawyerDto>> = _matchingLawyers
+
+    // --- Available Slots ---
+    private val _availableSlots = MutableStateFlow<List<CalendarSlotDto>>(emptyList())
+    val availableSlots: StateFlow<List<CalendarSlotDto>> = _availableSlots
+
+    // --- Appointments ---
+    private val _appointments = MutableStateFlow<List<AppointmentDto>>(emptyList())
+    val appointments: StateFlow<List<AppointmentDto>> = _appointments
 
     // --- State ---
     private val _isLoading = MutableStateFlow(false)
@@ -32,6 +42,7 @@ class ClientViewModel : ViewModel() {
 
     init {
         fetchMyLeads()
+        fetchAppointments()
     }
 
     fun fetchMyLeads() {
@@ -47,13 +58,14 @@ class ClientViewModel : ViewModel() {
         }
     }
 
-    fun createLead(title: String, description: String, category: String, city: String) {
+    fun createLead(title: String, description: String, category: String, city: String, onCreated: (Long) -> Unit) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                ApiService.createLead(CreateLeadRequest(title, description, category, city))
+                val lead = ApiService.createLead(CreateLeadRequest(title, description, category, city))
                 _successMessage.value = "İlan başarıyla oluşturuldu!"
                 fetchMyLeads() // Listeyi yenile
+                onCreated(lead.id)
             } catch (e: Exception) {
                 _error.value = "İlan oluşturulamadı: ${e.localizedMessage}"
             } finally {
@@ -62,28 +74,55 @@ class ClientViewModel : ViewModel() {
         }
     }
 
-    fun fetchBidsForLead(leadId: Long) {
+    fun fetchMatchingLawyers(leadId: Long) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                _bids.value = ApiService.getBidsForLead(leadId)
+                _matchingLawyers.value = ApiService.getMatchingLawyers(leadId)
             } catch (e: Exception) {
-                _error.value = "Teklifler yüklenemedi: ${e.localizedMessage}"
+                _error.value = "Eşleşen avukatlar yüklenemedi: ${e.localizedMessage}"
             } finally {
                 _isLoading.value = false
             }
         }
     }
 
-    fun acceptBid(bidId: Long, leadId: Long) {
+    fun fetchAvailableSlots(lawyerId: Long) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                ApiService.acceptBid(bidId)
-                _successMessage.value = "Teklif kabul edildi! İletişim bilgileri açıldı."
-                fetchBidsForLead(leadId) // Listeyi yenile
+                _availableSlots.value = ApiService.getAvailableCalendarSlots(lawyerId)
             } catch (e: Exception) {
-                _error.value = "Teklif kabul edilemedi: ${e.localizedMessage}"
+                _error.value = "Müsait zamanlar yüklenemedi: ${e.localizedMessage}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun bookAppointment(lawyerId: Long, leadId: Long?, appointmentTime: String, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                ApiService.bookAppointment(lawyerId, leadId, appointmentTime)
+                _successMessage.value = "Randevu talebi oluşturuldu ve platform ücreti ödemesi yapıldı!"
+                fetchAppointments()
+                onSuccess()
+            } catch (e: Exception) {
+                _error.value = "Randevu alınamadı: ${e.localizedMessage}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun fetchAppointments() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                _appointments.value = ApiService.getMyAppointments()
+            } catch (e: Exception) {
+                _error.value = "Randevular yüklenemedi: ${e.localizedMessage}"
             } finally {
                 _isLoading.value = false
             }

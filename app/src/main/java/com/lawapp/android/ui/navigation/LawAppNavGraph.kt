@@ -20,6 +20,7 @@ import com.lawapp.android.ui.client.*
 import com.lawapp.android.ui.lawyer.*
 import com.lawapp.android.ui.leads.CreateLeadScreen
 import com.lawapp.android.ui.chat.*
+import com.lawapp.android.ui.common.*
 
 // --- Route Tanımları ---
 object Routes {
@@ -28,15 +29,18 @@ object Routes {
     const val REGISTER = "register/{role}"
     const val LAWYER_HOME = "lawyer_home"
     const val CLIENT_HOME = "client_home"
-    const val LEAD_DETAIL = "lead_detail/{leadId}"
-    const val LEAD_BIDS = "lead_bids/{leadId}"
+    const val CALENDAR = "calendar_management"
+    const val SPECIALIZED_LAWYERS = "specialized_lawyers/{leadId}/{leadTitle}"
+    const val LAWYER_DETAILS = "lawyer_details/{lawyerId}/{leadId}"
+    const val PAYMENT_CHECKOUT = "payment_checkout/{lawyerId}/{leadId}/{slotTime}"
+    const val CLIENT_APPOINTMENTS = "client_appointments"
     const val LAWYER_PROFILE = "lawyer_profile"
     const val CLIENT_PROFILE = "client_profile"
     const val WALLET = "wallet"
-    const val TEMPLATES = "templates"
     const val CREATE_LEAD = "create_lead"
     const val CHAT_LIST = "chat_list"
     const val CHAT_DETAIL = "chat_detail/{sessionId}/{partnerName}/{partnerRole}/{leadTitle}"
+    const val VIDEO_CALL = "video_call/{partnerName}"
 }
 
 // --- Bottom Navigation Item ---
@@ -47,8 +51,8 @@ data class BottomNavItem(
 )
 
 val lawyerBottomNavItems = listOf(
-    BottomNavItem("İş Havuzu", Icons.Default.Search, Routes.LAWYER_HOME),
-    BottomNavItem("Şablonlar", Icons.Default.Description, Routes.TEMPLATES),
+    BottomNavItem("Randevular", Icons.Default.DateRange, Routes.LAWYER_HOME),
+    BottomNavItem("Takvimim", Icons.Default.CalendarMonth, Routes.CALENDAR),
     BottomNavItem("Mesajlar", Icons.Default.Chat, Routes.CHAT_LIST),
     BottomNavItem("Cüzdan", Icons.Default.AccountBalanceWallet, Routes.WALLET),
     BottomNavItem("Profil", Icons.Default.Person, Routes.LAWYER_PROFILE)
@@ -57,18 +61,22 @@ val lawyerBottomNavItems = listOf(
 val clientBottomNavItems = listOf(
     BottomNavItem("İlanlarım", Icons.Default.List, Routes.CLIENT_HOME),
     BottomNavItem("Yeni İlan", Icons.Default.Add, Routes.CREATE_LEAD),
+    BottomNavItem("Randevular", Icons.Default.DateRange, Routes.CLIENT_APPOINTMENTS),
     BottomNavItem("Mesajlar", Icons.Default.Chat, Routes.CHAT_LIST),
     BottomNavItem("Profil", Icons.Default.Person, Routes.CLIENT_PROFILE)
 )
 
 // --- Lawyer Home with Bottom Nav ---
 @Composable
-fun LawyerScaffold(navController: NavHostController) {
+fun LawyerScaffold(
+    navController: NavHostController,
+    onStartCall: (String) -> Unit
+) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val viewModel: LawyerViewModel = viewModel()
-    val leads by viewModel.leads.collectAsState()
-    val templates by viewModel.templates.collectAsState()
+    val appointments by viewModel.appointments.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
     Scaffold(
         bottomBar = {
@@ -96,51 +104,22 @@ fun LawyerScaffold(navController: NavHostController) {
             modifier = Modifier.padding(padding)
         ) {
             composable(Routes.LAWYER_HOME) {
-                // API'den gelen Lead DTO'larını UI modeline çevir
-                val uiLeads = leads.map { dto ->
-                    Lead(dto.id, dto.title, dto.category, dto.city, dto.description)
-                }
-                LeadFeedScreen(
-                    leads = uiLeads,
-                    onLeadClick = { lead ->
-                        navController.navigate("lead_detail/${lead.id}")
-                    }
+                AppointmentsListScreen(
+                    role = "LAWYER",
+                    appointments = appointments,
+                    isLoading = isLoading,
+                    onAcceptClick = { id -> viewModel.acceptAppointment(id) },
+                    onRejectClick = { id -> viewModel.rejectAppointment(id) },
+                    onRefresh = { viewModel.fetchAppointments() }
                 )
             }
-            composable(
-                Routes.LEAD_DETAIL,
-                arguments = listOf(navArgument("leadId") { type = NavType.LongType })
-            ) { backStackEntry ->
-                val leadId = backStackEntry.arguments?.getLong("leadId") ?: 0L
-                // leads listesinden ilgili lead'i bul
-                val leadDto = leads.find { it.id == leadId }
-                val lead = leadDto?.let {
-                    Lead(it.id, it.title, it.category, it.city, it.description)
-                } ?: Lead(leadId, "", "", "", "")
-
-                val uiTemplates = templates.map { BidTemplateUI(it.id, it.title, it.content) }
-
-                LeadDetailScreen(
-                    lead = lead,
-                    templates = uiTemplates,
-                    onBidSubmit = { message ->
-                        viewModel.placeBid(leadId, message)
-                        navController.popBackStack()
-                    }
-                )
-            }
-            composable(Routes.TEMPLATES) {
-                val uiTemplates = templates.map { BidTemplateUI(it.id, it.title, it.content) }
-                TemplatesScreen(
-                    templates = uiTemplates,
-                    onCreateTemplate = { title, content -> viewModel.createTemplate(title, content) },
-                    onDeleteTemplate = { id -> viewModel.deleteTemplate(id) }
-                )
+            composable(Routes.CALENDAR) {
+                CalendarManagementScreen(viewModel = viewModel)
             }
             composable(Routes.CHAT_LIST) {
                 val chatViewModel: ChatViewModel = viewModel()
                 val sessions by chatViewModel.chatSessions.collectAsState()
-                val isLoading by chatViewModel.isLoading.collectAsState()
+                val chatLoading by chatViewModel.isLoading.collectAsState()
 
                 LaunchedEffect(Unit) {
                     chatViewModel.fetchChatSessions()
@@ -148,7 +127,7 @@ fun LawyerScaffold(navController: NavHostController) {
 
                 ChatListScreen(
                     sessions = sessions,
-                    isLoading = isLoading,
+                    isLoading = chatLoading,
                     onSessionClick = { session ->
                         navController.navigate("chat_detail/${session.id}/${session.otherParticipantName}/${session.otherParticipantRole}/${session.leadTitle}")
                     }
@@ -189,7 +168,7 @@ fun LawyerScaffold(navController: NavHostController) {
             }
             composable(Routes.WALLET) {
                 WalletScreen(
-                    currentBalance = 250, // TODO: API'den kredi bakiyesi çekilecek
+                    currentBalance = 250,
                     onPackageClick = { pkg -> /* Ödeme akışı */ }
                 )
             }
@@ -202,12 +181,16 @@ fun LawyerScaffold(navController: NavHostController) {
 
 // --- Client Home with Bottom Nav ---
 @Composable
-fun ClientScaffold(navController: NavHostController) {
+fun ClientScaffold(
+    navController: NavHostController,
+    onStartCall: (String) -> Unit
+) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val viewModel: ClientViewModel = viewModel()
     val myLeads by viewModel.myLeads.collectAsState()
-    val bids by viewModel.bids.collectAsState()
+    val appointments by viewModel.appointments.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
     Scaffold(
         bottomBar = {
@@ -241,33 +224,79 @@ fun ClientScaffold(navController: NavHostController) {
                 ClientLeadsScreen(
                     myLeads = uiLeads,
                     onLeadClick = { lead ->
-                        viewModel.fetchBidsForLead(lead.id)
-                        navController.navigate("lead_bids/${lead.id}")
+                        navController.navigate("specialized_lawyers/${lead.id}/${lead.title}")
                     }
                 )
             }
             composable(
-                Routes.LEAD_BIDS,
-                arguments = listOf(navArgument("leadId") { type = NavType.LongType })
+                Routes.SPECIALIZED_LAWYERS,
+                arguments = listOf(
+                    navArgument("leadId") { type = NavType.LongType },
+                    navArgument("leadTitle") { type = NavType.StringType }
+                )
             ) { backStackEntry ->
                 val leadId = backStackEntry.arguments?.getLong("leadId") ?: 0L
-                val leadTitle = myLeads.find { it.id == leadId }?.title ?: "İlan #$leadId"
-
-                val uiBids = bids.map { dto ->
-                    BidUI(
-                        id = dto.id,
-                        lawyerName = dto.lawyer?.fullName ?: "Avukat",
-                        message = dto.message,
-                        date = dto.createdAt ?: "",
-                        phoneNumber = dto.lawyer?.phoneNumber ?: "Bilgi yok",
-                        status = dto.status ?: "PENDING"
-                    )
-                }
-                LeadBidsScreen(
+                val leadTitle = backStackEntry.arguments?.getString("leadTitle") ?: ""
+                SpecializedLawyersScreen(
+                    leadId = leadId,
                     leadTitle = leadTitle,
-                    bids = uiBids,
-                    onAcceptBid = { bid -> viewModel.acceptBid(bid.id, leadId) },
-                    onContactLawyer = { bid -> /* Telefon araması Intent'i */ }
+                    viewModel = viewModel,
+                    onLawyerClick = { lawyerId ->
+                        navController.navigate("lawyer_details/$lawyerId/$leadId")
+                    },
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
+            composable(
+                Routes.LAWYER_DETAILS,
+                arguments = listOf(
+                    navArgument("lawyerId") { type = NavType.LongType },
+                    navArgument("leadId") { type = NavType.LongType }
+                )
+            ) { backStackEntry ->
+                val lawyerId = backStackEntry.arguments?.getLong("lawyerId") ?: 0L
+                val leadId = backStackEntry.arguments?.getLong("leadId") ?: 0L
+                LawyerDetailsScreen(
+                    lawyerId = lawyerId,
+                    leadId = leadId,
+                    viewModel = viewModel,
+                    onSlotSelected = { slotTime ->
+                        navController.navigate("payment_checkout/$lawyerId/$leadId/$slotTime")
+                    },
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
+            composable(
+                Routes.PAYMENT_CHECKOUT,
+                arguments = listOf(
+                    navArgument("lawyerId") { type = NavType.LongType },
+                    navArgument("leadId") { type = NavType.LongType },
+                    navArgument("slotTime") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val lawyerId = backStackEntry.arguments?.getLong("lawyerId") ?: 0L
+                val leadId = backStackEntry.arguments?.getLong("leadId") ?: 0L
+                val slotTime = backStackEntry.arguments?.getString("slotTime") ?: ""
+                PaymentCheckoutScreen(
+                    lawyerId = lawyerId,
+                    leadId = leadId,
+                    slotTime = slotTime,
+                    viewModel = viewModel,
+                    onPaymentSuccess = {
+                        navController.navigate(Routes.CLIENT_APPOINTMENTS) {
+                            popUpTo(Routes.CLIENT_HOME) { saveState = false }
+                        }
+                    },
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
+            composable(Routes.CLIENT_APPOINTMENTS) {
+                AppointmentsListScreen(
+                    role = "CLIENT",
+                    appointments = appointments,
+                    isLoading = isLoading,
+                    onStartCall = { app -> onStartCall(app.lawyerName) },
+                    onRefresh = { viewModel.fetchAppointments() }
                 )
             }
             composable(Routes.CREATE_LEAD) {
@@ -283,7 +312,7 @@ fun ClientScaffold(navController: NavHostController) {
             composable(Routes.CHAT_LIST) {
                 val chatViewModel: ChatViewModel = viewModel()
                 val sessions by chatViewModel.chatSessions.collectAsState()
-                val isLoading by chatViewModel.isLoading.collectAsState()
+                val chatLoading by chatViewModel.isLoading.collectAsState()
 
                 LaunchedEffect(Unit) {
                     chatViewModel.fetchChatSessions()
@@ -291,7 +320,7 @@ fun ClientScaffold(navController: NavHostController) {
 
                 ChatListScreen(
                     sessions = sessions,
-                    isLoading = isLoading,
+                    isLoading = chatLoading,
                     onSessionClick = { session ->
                         navController.navigate("chat_detail/${session.id}/${session.otherParticipantName}/${session.otherParticipantRole}/${session.leadTitle}")
                     }
@@ -384,12 +413,30 @@ fun LawAppNavGraph() {
             )
         }
         composable("lawyer_main") {
-            val lawyerNavController = rememberNavController()
-            LawyerScaffold(navController = lawyerNavController)
+            LawyerScaffold(
+                navController = rememberNavController(),
+                onStartCall = { partnerName ->
+                    rootNavController.navigate("video_call/$partnerName")
+                }
+            )
         }
         composable("client_main") {
-            val clientNavController = rememberNavController()
-            ClientScaffold(navController = clientNavController)
+            ClientScaffold(
+                navController = rememberNavController(),
+                onStartCall = { partnerName ->
+                    rootNavController.navigate("video_call/$partnerName")
+                }
+            )
+        }
+        composable(
+            Routes.VIDEO_CALL,
+            arguments = listOf(navArgument("partnerName") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val partnerName = backStackEntry.arguments?.getString("partnerName") ?: "Görüşme"
+            VideoCallScreen(
+                partnerName = partnerName,
+                onEndCall = { rootNavController.popBackStack() }
+            )
         }
     }
 }

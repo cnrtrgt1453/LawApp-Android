@@ -3,21 +3,21 @@ package com.lawapp.android.ui.lawyer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lawapp.android.data.ApiService
-import com.lawapp.android.data.model.BidTemplateDto
-import com.lawapp.android.data.model.LeadDto
+import com.lawapp.android.data.model.AppointmentDto
+import com.lawapp.android.data.model.CalendarSlotDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class LawyerViewModel : ViewModel() {
 
-    // --- Leads ---
-    private val _leads = MutableStateFlow<List<LeadDto>>(emptyList())
-    val leads: StateFlow<List<LeadDto>> = _leads
+    // --- Calendar Slots ---
+    private val _slots = MutableStateFlow<List<CalendarSlotDto>>(emptyList())
+    val slots: StateFlow<List<CalendarSlotDto>> = _slots
 
-    // --- Templates ---
-    private val _templates = MutableStateFlow<List<BidTemplateDto>>(emptyList())
-    val templates: StateFlow<List<BidTemplateDto>> = _templates
+    // --- Appointments ---
+    private val _appointments = MutableStateFlow<List<AppointmentDto>>(emptyList())
+    val appointments: StateFlow<List<AppointmentDto>> = _appointments
 
     // --- State ---
     private val _isLoading = MutableStateFlow(false)
@@ -30,65 +30,100 @@ class LawyerViewModel : ViewModel() {
     val successMessage: StateFlow<String?> = _successMessage
 
     init {
-        fetchLeads()
-        fetchTemplates()
+        // Avukat detaylarını yükle
+        fetchCalendarSlots()
+        fetchAppointments()
     }
 
-    fun fetchLeads() {
+    fun fetchCalendarSlots() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                _leads.value = ApiService.getAllLeads()
+                // Avukatın kendi ID'sine ihtiyaç duymadan token'dan alan yapısı veya
+                // profile endpoint'i üzerinden id alabiliriz. Ancak backend'de
+                // calendar/add ve delete token üzerinden çalışmaktadır.
+                // calendar/lawyer/{id} için kendi profil ID'mizi almalıyız.
+                val profile = ApiService.getLawyerProfile()
+                _slots.value = ApiService.getCalendarSlots(profile.id ?: 0L)
             } catch (e: Exception) {
-                _error.value = "İlanlar yüklenemedi: ${e.localizedMessage}"
+                _error.value = "Takvim slotları yüklenemedi: ${e.localizedMessage}"
             } finally {
                 _isLoading.value = false
             }
         }
     }
 
-    fun fetchTemplates() {
-        viewModelScope.launch {
-            try {
-                _templates.value = ApiService.getTemplates()
-            } catch (e: Exception) {
-                _error.value = "Şablonlar yüklenemedi: ${e.localizedMessage}"
-            }
-        }
-    }
-
-    fun placeBid(leadId: Long, message: String) {
+    fun addCalendarSlot(slotTime: String) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                ApiService.placeBid(leadId, message)
-                _successMessage.value = "Teklif başarıyla gönderildi!"
+                ApiService.addCalendarSlot(slotTime)
+                _successMessage.value = "Yeni saat dilimi takviminize eklendi."
+                fetchCalendarSlots()
             } catch (e: Exception) {
-                _error.value = "Teklif gönderilemedi: ${e.localizedMessage}"
+                _error.value = "Slot eklenemedi: ${e.localizedMessage}"
             } finally {
                 _isLoading.value = false
             }
         }
     }
 
-    fun createTemplate(title: String, content: String) {
+    fun deleteCalendarSlot(slotId: Long) {
         viewModelScope.launch {
+            _isLoading.value = true
             try {
-                ApiService.createTemplate(title, content)
-                fetchTemplates() // Listeyi yenile
+                ApiService.deleteCalendarSlot(slotId)
+                _successMessage.value = "Saat dilimi silindi."
+                fetchCalendarSlots()
             } catch (e: Exception) {
-                _error.value = "Şablon oluşturulamadı: ${e.localizedMessage}"
+                _error.value = "Slot silinemedi: ${e.localizedMessage}"
+            } finally {
+                _isLoading.value = false
             }
         }
     }
 
-    fun deleteTemplate(id: Long) {
+    fun fetchAppointments() {
         viewModelScope.launch {
+            _isLoading.value = true
             try {
-                ApiService.deleteTemplate(id)
-                fetchTemplates()
+                _appointments.value = ApiService.getMyAppointments()
             } catch (e: Exception) {
-                _error.value = "Şablon silinemedi: ${e.localizedMessage}"
+                _error.value = "Randevular yüklenemedi: ${e.localizedMessage}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun acceptAppointment(appointmentId: Long) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                ApiService.acceptAppointment(appointmentId)
+                _successMessage.value = "Randevu onaylandı!"
+                fetchAppointments()
+                fetchCalendarSlots() // Slot müsaitlik durumunu güncelle
+            } catch (e: Exception) {
+                _error.value = "Randevu onaylanamadı: ${e.localizedMessage}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun rejectAppointment(appointmentId: Long) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                ApiService.rejectAppointment(appointmentId)
+                _successMessage.value = "Randevu reddedildi ve ücret müvekkile iade edildi."
+                fetchAppointments()
+                fetchCalendarSlots() // Slotu tekrar boşa çıkar
+            } catch (e: Exception) {
+                _error.value = "Randevu reddedilemedi: ${e.localizedMessage}"
+            } finally {
+                _isLoading.value = false
             }
         }
     }

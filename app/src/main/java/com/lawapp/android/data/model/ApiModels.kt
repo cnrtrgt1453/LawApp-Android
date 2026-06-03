@@ -39,22 +39,44 @@ data class CreateLeadRequest(
     val wizardAnswersJson: String? = null // Akıllı sihirbaz sorularının JSON verileri
 )
 
-// --- Bid (Consultation Request) ---
+// --- Calendar Slot ---
 @Serializable
-data class BidDto(
+data class CalendarSlotDto(
     val id: Long = 0,
-    val message: String,
-    val status: String? = null,
-    val createdAt: String? = null,
-    val lawyer: UserSummary? = null
+    val lawyerId: Long,
+    val slotTime: String,
+    val available: Boolean
 )
 
-typealias ConsultationRequestDto = BidDto
+@Serializable
+data class CreateCalendarSlotRequest(
+    val slotTime: String
+)
+
+// --- Appointment ---
+@Serializable
+data class AppointmentDto(
+    val id: Long = 0,
+    val clientId: Long,
+    val clientName: String,
+    val lawyerId: Long,
+    val lawyerName: String,
+    val appointmentTime: String,
+    val status: String,
+    val platformFee: Double,
+    val paymentStatus: String,
+    val roomId: String? = null,
+    val leadId: Long? = null,
+    val leadTitle: String? = null,
+    val leadCategory: String? = null
+)
 
 @Serializable
-data class PlaceBidRequest(val leadId: Long, val message: String)
-
-typealias PlaceConsultationRequest = PlaceBidRequest
+data class BookAppointmentRequest(
+    val lawyerId: Long,
+    val leadId: Long? = null,
+    val appointmentTime: String
+)
 
 // --- User ---
 @Serializable
@@ -70,10 +92,17 @@ data class UserSummary(
     val specialties: List<String>? = emptyList()
 )
 
-// --- Bid Template ---
+// --- Lawyer Details ---
 @Serializable
-data class BidTemplateDto(
-    val id: Long = 0,
-    val title: String,
-    val content: String
+data class LawyerDto(
+    val id: Long,
+    val fullName: String,
+    val averageRating: Double = 5.0,
+    val specialties: List<String> = emptyList(),
+    val phoneNumber: String? = null,
+    val barNumber: String? = null,
+    val verified: Boolean = false,
+    val bio: String? = null,
+    val profileImageUrl: String? = null,
+    val introVideoUrl: String? = null
 )

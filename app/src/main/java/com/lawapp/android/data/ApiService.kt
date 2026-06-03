@@ -58,45 +58,62 @@ object ApiService {
         return response.body()
     }
 
-    // ==================== BIDS ====================
+    // ==================== CALENDAR ====================
 
-    suspend fun placeBid(leadId: Long, message: String): BidDto {
-        val response = client.post("$baseUrl/bids/place") {
+    suspend fun getCalendarSlots(lawyerId: Long): List<CalendarSlotDto> {
+        val response = client.get("$baseUrl/calendar/lawyer/$lawyerId") { auth() }
+        return response.body()
+    }
+
+    suspend fun getAvailableCalendarSlots(lawyerId: Long): List<CalendarSlotDto> {
+        val response = client.get("$baseUrl/calendar/lawyer/$lawyerId/available") { auth() }
+        return response.body()
+    }
+
+    suspend fun addCalendarSlot(slotTime: String): CalendarSlotDto {
+        val response = client.post("$baseUrl/calendar/add") {
             auth()
             contentType(ContentType.Application.Json)
-            setBody(PlaceBidRequest(leadId, message))
+            setBody(CreateCalendarSlotRequest(slotTime))
         }
         return response.body()
     }
 
-    suspend fun getBidsForLead(leadId: Long): List<BidDto> {
-        val response = client.get("$baseUrl/bids/lead/$leadId") { auth() }
-        return response.body()
+    suspend fun deleteCalendarSlot(slotId: Long) {
+        client.delete("$baseUrl/calendar/delete/$slotId") { auth() }
     }
 
-    suspend fun acceptBid(bidId: Long): BidDto {
-        val response = client.post("$baseUrl/bids/$bidId/accept") { auth() }
-        return response.body()
-    }
+    // ==================== APPOINTMENTS ====================
 
-    // ==================== TEMPLATES ====================
-
-    suspend fun getTemplates(): List<BidTemplateDto> {
-        val response = client.get("$baseUrl/templates") { auth() }
-        return response.body()
-    }
-
-    suspend fun createTemplate(title: String, content: String): BidTemplateDto {
-        val response = client.post("$baseUrl/templates") {
+    suspend fun bookAppointment(lawyerId: Long, leadId: Long?, appointmentTime: String): AppointmentDto {
+        val response = client.post("$baseUrl/appointments/book") {
             auth()
             contentType(ContentType.Application.Json)
-            setBody(BidTemplateDto(title = title, content = content))
+            setBody(BookAppointmentRequest(lawyerId, leadId, appointmentTime))
         }
         return response.body()
     }
 
-    suspend fun deleteTemplate(id: Long) {
-        client.delete("$baseUrl/templates/$id") { auth() }
+    suspend fun acceptAppointment(id: Long): AppointmentDto {
+        val response = client.post("$baseUrl/appointments/$id/accept") { auth() }
+        return response.body()
+    }
+
+    suspend fun rejectAppointment(id: Long): AppointmentDto {
+        val response = client.post("$baseUrl/appointments/$id/reject") { auth() }
+        return response.body()
+    }
+
+    suspend fun getMyAppointments(): List<AppointmentDto> {
+        val response = client.get("$baseUrl/appointments/my") { auth() }
+        return response.body()
+    }
+
+    // ==================== MATCHING LAWYERS ====================
+
+    suspend fun getMatchingLawyers(leadId: Long): List<LawyerDto> {
+        val response = client.get("$baseUrl/leads/$leadId/matching-lawyers") { auth() }
+        return response.body()
     }
 
     // ==================== PROFILE ====================
