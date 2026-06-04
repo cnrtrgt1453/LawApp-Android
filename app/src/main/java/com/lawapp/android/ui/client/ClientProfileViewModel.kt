@@ -4,11 +4,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lawapp.android.data.ApiService
 import com.lawapp.android.data.model.ClientProfile
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ClientProfileViewModel : ViewModel() {
+@HiltViewModel
+class ClientProfileViewModel @Inject constructor(
+    private val apiService: ApiService
+) : ViewModel() {
 
     private val _profile = MutableStateFlow<ClientProfile?>(null)
     val profile: StateFlow<ClientProfile?> = _profile
@@ -27,7 +32,7 @@ class ClientProfileViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                _profile.value = ApiService.getClientProfile()
+                _profile.value = apiService.getClientProfile()
             } catch (e: Exception) {
                 _error.value = "Profil yüklenemedi: ${e.localizedMessage}"
             } finally {
@@ -40,7 +45,7 @@ class ClientProfileViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                _profile.value = ApiService.updateClientProfile(bio)
+                _profile.value = apiService.updateClientProfile(bio)
             } catch (e: Exception) {
                 _error.value = "Güncelleme başarısız: ${e.localizedMessage}"
             } finally {

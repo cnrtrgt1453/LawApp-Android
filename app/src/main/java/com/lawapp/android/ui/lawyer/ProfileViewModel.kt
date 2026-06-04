@@ -5,11 +5,16 @@ import androidx.lifecycle.viewModelScope
 import com.lawapp.android.data.ApiService
 import com.lawapp.android.data.model.LawyerProfile
 import com.lawapp.android.data.model.ProfileUpdateDto
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ProfileViewModel : ViewModel() {
+@HiltViewModel
+class ProfileViewModel @Inject constructor(
+    private val apiService: ApiService
+) : ViewModel() {
 
     private val _profile = MutableStateFlow<LawyerProfile?>(null)
     val profile: StateFlow<LawyerProfile?> = _profile
@@ -28,7 +33,7 @@ class ProfileViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                _profile.value = ApiService.getLawyerProfile()
+                _profile.value = apiService.getLawyerProfile()
             } catch (e: Exception) {
                 _error.value = "Profil yüklenemedi: ${e.localizedMessage}"
             } finally {
@@ -42,7 +47,7 @@ class ProfileViewModel : ViewModel() {
             _isLoading.value = true
             try {
                 val dto = ProfileUpdateDto(bio, linkedin, instagram, website)
-                _profile.value = ApiService.updateLawyerProfile(dto)
+                _profile.value = apiService.updateLawyerProfile(dto)
             } catch (e: Exception) {
                 _error.value = "Güncelleme başarısız: ${e.localizedMessage}"
             } finally {

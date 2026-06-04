@@ -25,12 +25,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LawyerProfileScreen(
-    viewModel: ProfileViewModel = viewModel()
+    viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val profile by viewModel.profile.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()

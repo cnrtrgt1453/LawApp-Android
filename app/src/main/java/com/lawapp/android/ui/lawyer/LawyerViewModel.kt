@@ -8,8 +8,13 @@ import com.lawapp.android.data.model.CalendarSlotDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class LawyerViewModel : ViewModel() {
+@HiltViewModel
+class LawyerViewModel @Inject constructor(
+    private val apiService: ApiService
+) : ViewModel() {
 
     // --- Calendar Slots ---
     private val _slots = MutableStateFlow<List<CalendarSlotDto>>(emptyList())
@@ -43,8 +48,8 @@ class LawyerViewModel : ViewModel() {
                 // profile endpoint'i üzerinden id alabiliriz. Ancak backend'de
                 // calendar/add ve delete token üzerinden çalışmaktadır.
                 // calendar/lawyer/{id} için kendi profil ID'mizi almalıyız.
-                val profile = ApiService.getLawyerProfile()
-                _slots.value = ApiService.getCalendarSlots(profile.id ?: 0L)
+                val profile = apiService.getLawyerProfile()
+                _slots.value = apiService.getCalendarSlots(profile.id ?: 0L)
             } catch (e: Exception) {
                 _error.value = "Takvim slotları yüklenemedi: ${e.localizedMessage}"
             } finally {
@@ -57,7 +62,7 @@ class LawyerViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                ApiService.addCalendarSlot(slotTime)
+                apiService.addCalendarSlot(slotTime)
                 _successMessage.value = "Yeni saat dilimi takviminize eklendi."
                 fetchCalendarSlots()
             } catch (e: Exception) {
@@ -72,7 +77,7 @@ class LawyerViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                ApiService.deleteCalendarSlot(slotId)
+                apiService.deleteCalendarSlot(slotId)
                 _successMessage.value = "Saat dilimi silindi."
                 fetchCalendarSlots()
             } catch (e: Exception) {
@@ -87,7 +92,7 @@ class LawyerViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                _appointments.value = ApiService.getMyAppointments()
+                _appointments.value = apiService.getMyAppointments()
             } catch (e: Exception) {
                 _error.value = "Randevular yüklenemedi: ${e.localizedMessage}"
             } finally {
@@ -100,7 +105,7 @@ class LawyerViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                ApiService.acceptAppointment(appointmentId)
+                apiService.acceptAppointment(appointmentId)
                 _successMessage.value = "Randevu onaylandı!"
                 fetchAppointments()
                 fetchCalendarSlots() // Slot müsaitlik durumunu güncelle
@@ -116,7 +121,7 @@ class LawyerViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                ApiService.rejectAppointment(appointmentId)
+                apiService.rejectAppointment(appointmentId)
                 _successMessage.value = "Randevu reddedildi ve ücret müvekkile iade edildi."
                 fetchAppointments()
                 fetchCalendarSlots() // Slotu tekrar boşa çıkar

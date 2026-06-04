@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.serialization)
+    id("kotlin-kapt")
+    alias(libs.plugins.hilt)
 }
 
 android {
@@ -64,6 +66,11 @@ dependencies {
     implementation(libs.firebase.messaging)
     implementation(libs.androidx.material.icons.extended)
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    
+    // Hilt
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     
     // Ktor
     implementation(libs.ktor.client.core)

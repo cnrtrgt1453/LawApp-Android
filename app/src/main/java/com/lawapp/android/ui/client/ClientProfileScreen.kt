@@ -19,12 +19,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClientProfileScreen(
-    viewModel: ClientProfileViewModel = viewModel()
+    viewModel: ClientProfileViewModel = hiltViewModel()
 ) {
     val profile by viewModel.profile.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()

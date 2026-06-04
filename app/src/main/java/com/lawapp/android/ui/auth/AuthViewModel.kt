@@ -5,11 +5,16 @@ import androidx.lifecycle.viewModelScope
 import com.lawapp.android.data.ApiService
 import com.lawapp.android.data.TokenManager
 import com.lawapp.android.data.model.RegisterRequest
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AuthViewModel : ViewModel() {
+@HiltViewModel
+class AuthViewModel @Inject constructor(
+    private val apiService: ApiService
+) : ViewModel() {
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -25,7 +30,7 @@ class AuthViewModel : ViewModel() {
             _isLoading.value = true
             _error.value = null
             try {
-                val response = ApiService.login(email, password)
+                val response = apiService.login(email, password)
                 TokenManager.saveToken(response.token, role)
                 _loginSuccess.value = true
             } catch (e: Exception) {
@@ -42,7 +47,7 @@ class AuthViewModel : ViewModel() {
             _error.value = null
             try {
                 val request = RegisterRequest(fullName, email, password, phone, role)
-                val response = ApiService.register(request)
+                val response = apiService.register(request)
                 TokenManager.saveToken(response.token, role)
                 _loginSuccess.value = true
             } catch (e: Exception) {

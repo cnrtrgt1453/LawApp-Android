@@ -7,7 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
@@ -74,7 +74,7 @@ fun LawyerScaffold(
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val viewModel: LawyerViewModel = viewModel()
+    val viewModel: LawyerViewModel = hiltViewModel()
     val appointments by viewModel.appointments.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
@@ -117,7 +117,7 @@ fun LawyerScaffold(
                 CalendarManagementScreen(viewModel = viewModel)
             }
             composable(Routes.CHAT_LIST) {
-                val chatViewModel: ChatViewModel = viewModel()
+                val chatViewModel: ChatViewModel = hiltViewModel()
                 val sessions by chatViewModel.chatSessions.collectAsState()
                 val chatLoading by chatViewModel.isLoading.collectAsState()
 
@@ -147,7 +147,7 @@ fun LawyerScaffold(
                 val partnerRole = backStackEntry.arguments?.getString("partnerRole") ?: ""
                 val leadTitle = backStackEntry.arguments?.getString("leadTitle") ?: ""
 
-                val chatViewModel: ChatViewModel = viewModel()
+                val chatViewModel: ChatViewModel = hiltViewModel()
                 val messages by chatViewModel.activeMessages.collectAsState()
 
                 LaunchedEffect(sessionId) {
@@ -187,7 +187,7 @@ fun ClientScaffold(
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val viewModel: ClientViewModel = viewModel()
+    val viewModel: ClientViewModel = hiltViewModel()
     val myLeads by viewModel.myLeads.collectAsState()
     val appointments by viewModel.appointments.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -310,7 +310,7 @@ fun ClientScaffold(
                 )
             }
             composable(Routes.CHAT_LIST) {
-                val chatViewModel: ChatViewModel = viewModel()
+                val chatViewModel: ChatViewModel = hiltViewModel()
                 val sessions by chatViewModel.chatSessions.collectAsState()
                 val chatLoading by chatViewModel.isLoading.collectAsState()
 
@@ -340,7 +340,7 @@ fun ClientScaffold(
                 val partnerRole = backStackEntry.arguments?.getString("partnerRole") ?: ""
                 val leadTitle = backStackEntry.arguments?.getString("leadTitle") ?: ""
 
-                val chatViewModel: ChatViewModel = viewModel()
+                val chatViewModel: ChatViewModel = hiltViewModel()
                 val messages by chatViewModel.activeMessages.collectAsState()
 
                 LaunchedEffect(sessionId) {

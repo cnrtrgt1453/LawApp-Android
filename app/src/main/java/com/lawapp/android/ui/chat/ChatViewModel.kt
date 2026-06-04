@@ -6,12 +6,18 @@ import com.lawapp.android.data.ApiService
 import com.lawapp.android.data.ChatRepository
 import com.lawapp.android.data.model.ChatMessageDto
 import com.lawapp.android.data.model.ChatSessionDto
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ChatViewModel : ViewModel() {
+@HiltViewModel
+class ChatViewModel @Inject constructor(
+    private val apiService: ApiService,
+    private val chatRepository: ChatRepository
+) : ViewModel() {
 
     private val _chatSessions = MutableStateFlow<List<ChatSessionDto>>(emptyList())
     val chatSessions: StateFlow<List<ChatSessionDto>> = _chatSessions.asStateFlow()
@@ -34,7 +40,7 @@ class ChatViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                _chatSessions.value = ApiService.getChatSessions()
+                _chatSessions.value = apiService.getChatSessions()
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
@@ -46,7 +52,7 @@ class ChatViewModel : ViewModel() {
     private fun startWebSocketListener() {
         viewModelScope.launch {
             try {
-                ChatRepository.connectToChat().collect { incoming ->
+                chatRepository.connectToChat().collect { incoming ->
                     // Eğer gelen mesaj şu an açık olan odanın mesajıysa, listeye ekle
                     if (incoming.sessionId == _activeSessionId.value) {
                         // Aynı mesajın iki kere eklenmesini önlemek için ID kontrolü yapalım (eko)
@@ -57,7 +63,7 @@ class ChatViewModel : ViewModel() {
                         }
                     }
                     // Mesaj listesi değiştiği için odaların son mesaj/okunmamış sayılarını güncelle
-                    _chatSessions.value = ApiService.getChatSessions()
+                    _chatSessions.value = apiService.getChatSessions()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -70,7 +76,7 @@ class ChatViewModel : ViewModel() {
             _activeSessionId.value = sessionId
             _isLoading.value = true
             try {
-                _activeMessages.value = ApiService.getChatMessages(sessionId)
+                _activeMessages.value = apiService.getChatMessages(sessionId)
                 markAsRead(sessionId)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -86,7 +92,7 @@ class ChatViewModel : ViewModel() {
         
         viewModelScope.launch {
             try {
-                ChatRepository.sendMessage(sessionId, content)
+                chatRepository.sendMessage(sessionId, content)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -96,7 +102,7 @@ class ChatViewModel : ViewModel() {
     private fun markAsRead(sessionId: Long) {
         viewModelScope.launch {
             try {
-                ApiService.markMessagesAsRead(sessionId)
+                apiService.markMessagesAsRead(sessionId)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -112,7 +118,7 @@ class ChatViewModel : ViewModel() {
     override fun onCleared() {
         super.onCleared()
         viewModelScope.launch {
-            ChatRepository.disconnect()
+            chatRepository.disconnect()
         }
     }
 }

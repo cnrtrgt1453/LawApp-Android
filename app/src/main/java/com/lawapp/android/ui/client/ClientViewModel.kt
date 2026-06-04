@@ -8,11 +8,16 @@ import com.lawapp.android.data.model.CalendarSlotDto
 import com.lawapp.android.data.model.CreateLeadRequest
 import com.lawapp.android.data.model.LeadDto
 import com.lawapp.android.data.model.LawyerDto
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ClientViewModel : ViewModel() {
+@HiltViewModel
+class ClientViewModel @Inject constructor(
+    private val apiService: ApiService
+) : ViewModel() {
 
     // --- Leads ---
     private val _myLeads = MutableStateFlow<List<LeadDto>>(emptyList())
@@ -49,7 +54,7 @@ class ClientViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                _myLeads.value = ApiService.getMyLeads()
+                _myLeads.value = apiService.getMyLeads()
             } catch (e: Exception) {
                 _error.value = "İlanlar yüklenemedi: ${e.localizedMessage}"
             } finally {
@@ -62,7 +67,7 @@ class ClientViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val lead = ApiService.createLead(CreateLeadRequest(title, description, category, city))
+                val lead = apiService.createLead(CreateLeadRequest(title, description, category, city))
                 _successMessage.value = "İlan başarıyla oluşturuldu!"
                 fetchMyLeads() // Listeyi yenile
                 onCreated(lead.id)
@@ -78,7 +83,7 @@ class ClientViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                _matchingLawyers.value = ApiService.getMatchingLawyers(leadId)
+                _matchingLawyers.value = apiService.getMatchingLawyers(leadId)
             } catch (e: Exception) {
                 _error.value = "Eşleşen avukatlar yüklenemedi: ${e.localizedMessage}"
             } finally {
@@ -91,7 +96,7 @@ class ClientViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                _availableSlots.value = ApiService.getAvailableCalendarSlots(lawyerId)
+                _availableSlots.value = apiService.getAvailableCalendarSlots(lawyerId)
             } catch (e: Exception) {
                 _error.value = "Müsait zamanlar yüklenemedi: ${e.localizedMessage}"
             } finally {
@@ -104,7 +109,7 @@ class ClientViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                ApiService.bookAppointment(lawyerId, leadId, appointmentTime)
+                apiService.bookAppointment(lawyerId, leadId, appointmentTime)
                 _successMessage.value = "Randevu talebi oluşturuldu ve platform ücreti ödemesi yapıldı!"
                 fetchAppointments()
                 onSuccess()
@@ -120,7 +125,7 @@ class ClientViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                _appointments.value = ApiService.getMyAppointments()
+                _appointments.value = apiService.getMyAppointments()
             } catch (e: Exception) {
                 _error.value = "Randevular yüklenemedi: ${e.localizedMessage}"
             } finally {
