@@ -27,8 +27,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lawapp.android.data.model.LawyerDto
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,6 +57,7 @@ fun LawyerDetailsScreen(
     }
 
     val scrollState = rememberScrollState()
+    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
 
     Scaffold(
         topBar = {
@@ -268,46 +272,95 @@ fun LawyerDetailsScreen(
                                 modifier = Modifier.padding(vertical = 12.dp)
                             )
                         } else {
-                            // Slotları grid halinde gösterelim
-                            val formatter = DateTimeFormatter.ofPattern("dd.MM - HH:mm")
                             val inputFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
-                            
-                            // LazyVerticalGrid inside verticalScroll can cause issues, so we can use a custom FlowRow or simple Column chunking.
-                            // To prevent scroll crashes, we display them as a list or custom flow.
-                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                slots.chunked(2).forEach { rowSlots ->
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        rowSlots.forEach { slot ->
-                                            val parsedTime = LocalDateTime.parse(slot.slotTime, inputFormatter)
-                                            val formatted = parsedTime.format(formatter)
-                                            
-                                            Box(
-                                                modifier = Modifier
-                                                    .weight(1f)
-                                                    .clip(RoundedCornerShape(8.dp))
-                                                    .background(MaterialTheme.colorScheme.primaryContainer)
-                                                    .border(
-                                                        width = 1.dp,
-                                                        color = MaterialTheme.colorScheme.primary,
-                                                        shape = RoundedCornerShape(8.dp)
+                            val uniqueDates = remember(slots) {
+                                slots.map { LocalDateTime.parse(it.slotTime, inputFormatter).toLocalDate() }.distinct().sorted()
+                            }
+
+                            LaunchedEffect(uniqueDates) {
+                                if (selectedDate == null && uniqueDates.isNotEmpty()) {
+                                    selectedDate = uniqueDates.first()
+                                }
+                            }
+
+                            // Tarih Seçici Yatay Liste
+                            val dateChipFormatter = DateTimeFormatter.ofPattern("dd MMM EEE")
+                            Text(
+                                text = "Tarih Seçin",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp,
+                                modifier = Modifier.padding(vertical = 4.dp)
+                            )
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                            ) {
+                                items(uniqueDates) { date ->
+                                    val isSelected = selectedDate == date
+                                    FilterChip(
+                                        selected = isSelected,
+                                        onClick = { selectedDate = date },
+                                        label = { Text(date.format(dateChipFormatter)) },
+                                        colors = FilterChipDefaults.filterChipColors(
+                                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                                        )
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            // Filtrelenmiş Slotları listeyelim
+                            val filteredSlots = slots.filter {
+                                LocalDateTime.parse(it.slotTime, inputFormatter).toLocalDate() == selectedDate
+                            }
+
+                            if (filteredSlots.isEmpty()) {
+                                Text(
+                                    text = "Seçilen tarihte müsait saat bulunmamaktadır.",
+                                    fontSize = 13.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(vertical = 8.dp)
+                                )
+                            } else {
+                                // Slotları grid halinde gösterelim
+                                val formatter = DateTimeFormatter.ofPattern("HH:mm")
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    filteredSlots.chunked(2).forEach { rowSlots ->
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            rowSlots.forEach { slot ->
+                                                val parsedTime = LocalDateTime.parse(slot.slotTime, inputFormatter)
+                                                val formatted = parsedTime.format(formatter)
+                                                
+                                                Box(
+                                                    modifier = Modifier
+                                                        .weight(1f)
+                                                        .clip(RoundedCornerShape(8.dp))
+                                                        .background(MaterialTheme.colorScheme.primaryContainer)
+                                                        .border(
+                                                            width = 1.dp,
+                                                            color = MaterialTheme.colorScheme.primary,
+                                                            shape = RoundedCornerShape(8.dp)
+                                                        )
+                                                        .clickable { onSlotSelected(slot.slotTime) }
+                                                        .padding(12.dp),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Text(
+                                                        text = formatted,
+                                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                        fontWeight = FontWeight.Bold,
+                                                        fontSize = 13.sp
                                                     )
-                                                    .clickable { onSlotSelected(slot.slotTime) }
-                                                    .padding(12.dp),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Text(
-                                                    text = formatted,
-                                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontSize = 13.sp
-                                                )
+                                                }
                                             }
-                                        }
-                                        if (rowSlots.size == 1) {
-                                            Spacer(modifier = Modifier.weight(1f))
+                                            if (rowSlots.size == 1) {
+                                                Spacer(modifier = Modifier.weight(1f))
+                                            }
                                         }
                                     }
                                 }

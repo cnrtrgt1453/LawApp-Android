@@ -161,7 +161,7 @@ fun LawyerProfileScreen(
                         Column(modifier = Modifier.weight(1.0f)) {
                             Text("Tanıtım Videosu", fontWeight = FontWeight.Bold)
                             Text(
-                                if (selectedVideoUri != null || profile?.introVideoUrl != null) "Video Mevcut" else "Henüz video eklenmedi (Max 5 dk)",
+                                if (selectedVideoUri != null || profile?.introVideoUrl != null) "Video Mevcut" else "Henüz video eklenmedi (Max 90 sn)",
                                 fontSize = 12.sp
                             )
                         }
