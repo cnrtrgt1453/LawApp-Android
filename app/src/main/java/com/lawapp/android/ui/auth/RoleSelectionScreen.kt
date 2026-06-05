@@ -66,10 +66,15 @@ fun RoleSelectionScreen(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(name = "Role Selection Screen", showBackground = true)
 @Composable
-fun RoleSelectionScreenPreview() {
+fun RoleSelectionPreview() {
     LawAppTheme {
-        RoleSelectionScreen(onRoleSelected = {})
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            RoleSelectionScreen(onRoleSelected = {})
+        }
     }
 }

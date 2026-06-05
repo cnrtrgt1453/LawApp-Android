@@ -1,6 +1,5 @@
 package com.lawapp.android.ui.client
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -10,8 +9,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lawapp.android.ui.theme.LawAppTheme
 
 @Composable
 fun CreateLeadWizardScreen(
@@ -233,5 +234,16 @@ fun CreateLeadWizardScreen(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CreateLeadWizardScreenPreview() {
+    LawAppTheme {
+        CreateLeadWizardScreen(
+            onLeadSubmit = { _, _, _, _, _ -> },
+            onCancel = {}
+        )
     }
 }

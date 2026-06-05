@@ -17,11 +17,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.lawapp.android.data.model.ClientProfile
+import com.lawapp.android.ui.theme.LawAppTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClientProfileScreen(
     viewModel: ClientProfileViewModel = hiltViewModel()
@@ -30,6 +32,22 @@ fun ClientProfileScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
 
+    ClientProfileScreenContent(
+        profile = profile,
+        isLoading = isLoading,
+        error = error,
+        onUpdateProfile = { bio -> viewModel.updateProfile(bio) }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ClientProfileScreenContent(
+    profile: ClientProfile?,
+    isLoading: Boolean,
+    error: String?,
+    onUpdateProfile: (String) -> Unit
+) {
     var bio by remember { mutableStateOf("") }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
@@ -124,7 +142,7 @@ fun ClientProfileScreen(
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Button(
-                    onClick = { viewModel.updateProfile(bio) },
+                    onClick = { onUpdateProfile(bio) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = MaterialTheme.shapes.medium,
                     enabled = !isLoading
@@ -146,5 +164,22 @@ fun ClientProfileScreen(
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ClientProfileScreenPreview() {
+    LawAppTheme {
+        ClientProfileScreenContent(
+            profile = ClientProfile(
+                id = 1,
+                bio = "Merhaba, hukuki süreçlerim için profesyonel destek arıyorum.",
+                profileImageUrl = null
+            ),
+            isLoading = false,
+            error = null,
+            onUpdateProfile = {}
+        )
     }
 }

@@ -32,6 +32,9 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.tooling.preview.Preview
+import com.lawapp.android.data.model.CalendarSlotDto
+import com.lawapp.android.ui.theme.LawAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,6 +59,24 @@ fun LawyerDetailsScreen(
         viewModel.fetchAvailableSlots(lawyerId)
     }
 
+    LawyerDetailsContent(
+        lawyer = lawyer,
+        slots = slots,
+        isLoading = isLoading,
+        onSlotSelected = onSlotSelected,
+        onBackClick = onBackClick
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LawyerDetailsContent(
+    lawyer: LawyerDto,
+    slots: List<CalendarSlotDto>,
+    isLoading: Boolean,
+    onSlotSelected: (String) -> Unit,
+    onBackClick: () -> Unit
+) {
     val scrollState = rememberScrollState()
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
 
@@ -370,5 +391,31 @@ fun LawyerDetailsScreen(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LawyerDetailsPreview() {
+    LawAppTheme {
+        LawyerDetailsContent(
+            lawyer = LawyerDto(
+                id = 1,
+                fullName = "Caner Yıldırım",
+                barNumber = "12345",
+                averageRating = 4.8,
+                specialties = listOf("Ceza Hukuku", "Aile Hukuku"),
+                bio = "10 yıllık tecrübesiyle her türlü hukuki sorununuzda yanınızdayız.",
+                verified = true
+            ),
+            slots = listOf(
+                CalendarSlotDto(1, 1, "2023-10-27T10:00:00", true),
+                CalendarSlotDto(2, 1, "2023-10-27T11:00:00", true),
+                CalendarSlotDto(3, 1, "2023-10-28T14:00:00", true)
+            ),
+            isLoading = false,
+            onSlotSelected = {},
+            onBackClick = {}
+        )
     }
 }

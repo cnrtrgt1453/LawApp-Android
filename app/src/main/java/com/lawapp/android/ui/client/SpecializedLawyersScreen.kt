@@ -17,9 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lawapp.android.data.model.LawyerDto
+import com.lawapp.android.ui.theme.LawAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,6 +39,24 @@ fun SpecializedLawyersScreen(
         viewModel.fetchMatchingLawyers(leadId)
     }
 
+    SpecializedLawyersScreenContent(
+        leadTitle = leadTitle,
+        lawyers = lawyers,
+        isLoading = isLoading,
+        onLawyerClick = onLawyerClick,
+        onBackClick = onBackClick
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SpecializedLawyersScreenContent(
+    leadTitle: String,
+    lawyers: List<LawyerDto>,
+    isLoading: Boolean,
+    onLawyerClick: (Long) -> Unit,
+    onBackClick: () -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -200,5 +220,36 @@ fun LawyerCard(
                 Text("Profili & Takvimi İncele", fontWeight = FontWeight.Bold)
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SpecializedLawyersScreenPreview() {
+    LawAppTheme {
+        SpecializedLawyersScreenContent(
+            leadTitle = "Boşanma Davası",
+            lawyers = listOf(
+                LawyerDto(
+                    id = 1,
+                    fullName = "Caner Yıldırım",
+                    averageRating = 4.8,
+                    specialties = listOf("Aile Hukuku", "Boşanma"),
+                    verified = true,
+                    bio = "Aile hukuku alanında 10 yıllık tecrübe."
+                ),
+                LawyerDto(
+                    id = 2,
+                    fullName = "Mehmet Demir",
+                    averageRating = 4.5,
+                    specialties = listOf("Ceza Hukuku", "Boşanma"),
+                    verified = false,
+                    bio = "Hızlı ve etkili çözümler."
+                )
+            ),
+            isLoading = false,
+            onLawyerClick = {},
+            onBackClick = {}
+        )
     }
 }

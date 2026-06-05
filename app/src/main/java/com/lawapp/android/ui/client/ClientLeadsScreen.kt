@@ -8,9 +8,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lawapp.android.ui.common.Lead
+import com.lawapp.android.ui.theme.LawAppTheme
 
 @Composable
 fun ClientLeadsScreen(
@@ -74,5 +76,31 @@ fun MyLeadItem(lead: Lead, onClick: () -> Unit) {
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ClientLeadsScreenPreview() {
+    LawAppTheme {
+        ClientLeadsScreen(
+            myLeads = listOf(
+                Lead(
+                    id = 1,
+                    title = "İş Kazası Tazminat Davası",
+                    category = "İş Hukuku",
+                    city = "İstanbul",
+                    description = "Şantiyede gerçekleşen kaza hakkında tazminat süreci."
+                ),
+                Lead(
+                    id = 2,
+                    title = "Boşanma Davası ve Velayet",
+                    category = "Aile Hukuku",
+                    city = "Ankara",
+                    description = "Anlaşmalı boşanma ve çocuk velayeti işlemleri."
+                )
+            ),
+            onLeadClick = {}
+        )
     }
 }

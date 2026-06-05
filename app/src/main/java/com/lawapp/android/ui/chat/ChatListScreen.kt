@@ -19,9 +19,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lawapp.android.data.model.ChatSessionDto
+import com.lawapp.android.ui.theme.LawAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,6 +98,7 @@ fun ChatListScreen(
         }
     }
 }
+
 
 @Composable
 fun ChatSessionItem(
@@ -232,5 +235,48 @@ fun ChatSessionItem(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ChatListScreenPreview() {
+    LawAppTheme {
+        ChatListScreen(
+            sessions = listOf(
+                ChatSessionDto(
+                    id = 1,
+                    leadId = 101,
+                    leadTitle = "İş Kazası Tazminat Davası",
+                    otherParticipantName = "Av. Ahmet Yılmaz",
+                    otherParticipantRole = "LAWYER",
+                    lastMessage = "Gerekli evrakları hazırladım, yarın görüşelim.",
+                    lastMessageTime = "2023-10-27T14:30:00",
+                    unreadCount = 2
+                ),
+                ChatSessionDto(
+                    id = 2,
+                    leadId = 102,
+                    leadTitle = "Boşanma Protokolü",
+                    otherParticipantName = "Müvekkil Ayşe Demir",
+                    otherParticipantRole = "CLIENT",
+                    lastMessage = "Tamamdır, teşekkürler.",
+                    lastMessageTime = "10:15",
+                    unreadCount = 0
+                ),
+                ChatSessionDto(
+                    id = 3,
+                    leadId = 103,
+                    leadTitle = "Gayrimenkul Satış Danışmanlığı",
+                    otherParticipantName = "Av. Selin Kaya",
+                    otherParticipantRole = "LAWYER",
+                    lastMessage = "Sözleşme taslağını e-posta ile gönderdim.",
+                    lastMessageTime = "Dün",
+                    unreadCount = 0
+                )
+            ),
+            isLoading = false,
+            onSessionClick = {}
+        )
     }
 }

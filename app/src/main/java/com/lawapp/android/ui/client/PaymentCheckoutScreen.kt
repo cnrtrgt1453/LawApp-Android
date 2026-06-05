@@ -19,7 +19,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import com.lawapp.android.data.model.LawyerDto
+import com.lawapp.android.ui.theme.LawAppTheme
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -39,6 +42,30 @@ fun PaymentCheckoutScreen(
 
     val lawyer = lawyers.find { it.id == lawyerId }
 
+    PaymentCheckoutContent(
+        lawyer = lawyer,
+        slotTime = slotTime,
+        isBookingLoading = isBookingLoading,
+        errorMsg = errorMsg,
+        onBookAppointment = {
+            viewModel.bookAppointment(lawyerId, leadId, slotTime) {
+                onPaymentSuccess()
+            }
+        },
+        onBackClick = onBackClick
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PaymentCheckoutContent(
+    lawyer: LawyerDto?,
+    slotTime: String,
+    isBookingLoading: Boolean,
+    errorMsg: String?,
+    onBookAppointment: () -> Unit,
+    onBackClick: () -> Unit
+) {
     // Girdi alanları
     var cardHolder by remember { mutableStateOf("") }
     var cardNumber by remember { mutableStateOf("") }
@@ -264,14 +291,10 @@ fun PaymentCheckoutScreen(
                     onClick = {
                         // Basit validation
                         if (cardHolder.isNotEmpty() && cardNumber.length == 16 && expiryDate.length == 5 && cvv.length == 3) {
-                            viewModel.bookAppointment(lawyerId, leadId, slotTime) {
-                                onPaymentSuccess()
-                            }
+                            onBookAppointment()
                         } else {
-                            viewModel.bookAppointment(lawyerId, leadId, slotTime) {
-                                // Geliştirme testi için validation hatasında bile ödemeyi kabul edelim
-                                onPaymentSuccess()
-                            }
+                            // Geliştirme testi için validation hatasında bile ödemeyi kabul edelim
+                            onBookAppointment()
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -288,5 +311,26 @@ fun PaymentCheckoutScreen(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PaymentCheckoutPreview() {
+    LawAppTheme {
+        PaymentCheckoutContent(
+            lawyer = LawyerDto(
+                id = 1,
+                fullName = "Caner Yıldırım",
+                averageRating = 4.8,
+                specialties = listOf("Ceza Hukuku", "Aile Hukuku"),
+                verified = true
+            ),
+            slotTime = "2023-11-27T10:00:00",
+            isBookingLoading = false,
+            errorMsg = null,
+            onBookAppointment = {},
+            onBackClick = {}
+        )
     }
 }

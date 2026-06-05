@@ -19,8 +19,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
 import com.lawapp.android.data.TokenManager
 import com.lawapp.android.data.model.ChatMessageDto
+import com.lawapp.android.ui.theme.LawAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,9 +32,9 @@ fun ChatDetailScreen(
     leadTitle: String,
     messages: List<ChatMessageDto>,
     onSendMessage: (String) -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    myEmail: String = TokenManager.email ?: ""
 ) {
-    val myEmail = TokenManager.email ?: ""
     var textState by remember { mutableStateOf("") }
     val lazyListState = rememberLazyListState()
 
@@ -215,5 +217,46 @@ fun MessageBubble(
                 modifier = Modifier.padding(horizontal = 4.dp)
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ChatDetailScreenPreview() {
+    LawAppTheme {
+        ChatDetailScreen(
+            partnerName = "Av. Ahmet Yılmaz",
+            partnerRole = "LAWYER",
+            leadTitle = "İş Hukuku Danışmanlığı",
+            messages = listOf(
+                ChatMessageDto(
+                    id = 1,
+                    sessionId = 100,
+                    senderEmail = "client@example.com",
+                    senderName = "Müvekkil Can",
+                    content = "Merhaba Ahmet Bey, dava süreci hakkında bilgi alabilir miyim?",
+                    createdAt = "2023-10-27T10:00:00"
+                ),
+                ChatMessageDto(
+                    id = 2,
+                    sessionId = 100,
+                    senderEmail = "lawyer@example.com",
+                    senderName = "Av. Ahmet Yılmaz",
+                    content = "Tabii ki, evrakları inceledim. Yarın adliyeye gidip son durumu kontrol edeceğim.",
+                    createdAt = "2023-10-27T10:05:00"
+                ),
+                ChatMessageDto(
+                    id = 3,
+                    sessionId = 100,
+                    senderEmail = "client@example.com",
+                    senderName = "Müvekkil Can",
+                    content = "Teşekkür ederim, bekliyorum.",
+                    createdAt = "2023-10-27T10:06:00"
+                )
+            ),
+            onSendMessage = {},
+            onBackClick = {},
+            myEmail = "client@example.com"
+        )
     }
 }
