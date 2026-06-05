@@ -21,12 +21,35 @@ fun LoginScreen(
     onNavigateToRegister: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
     val loginSuccess by viewModel.loginSuccess.collectAsState()
+
+    LoginScreenContent(
+        isLoading = isLoading,
+        error = error,
+        loginSuccess = loginSuccess,
+        onLogin = { email, password -> viewModel.login(email, password, role) },
+        onLoginSuccess = onLoginSuccess,
+        onNavigateToRegister = onNavigateToRegister,
+        onClearError = { viewModel.clearError() }
+    )
+}
+
+@Composable
+fun LoginScreenContent(
+    isLoading: Boolean,
+    error: String?,
+    loginSuccess: Boolean,
+    onLogin: (String, String) -> Unit,
+    onLoginSuccess: () -> Unit,
+    onNavigateToRegister: () -> Unit,
+    onClearError: () -> Unit
+) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     val snackbarHostState = remember { SnackbarHostState() }
+
     val scope = rememberCoroutineScope()
 
     // Karar-5: Login başarılıysa navigasyonu tetikle
@@ -38,7 +61,7 @@ fun LoginScreen(
     LaunchedEffect(error) {
         error?.let {
             scope.launch { snackbarHostState.showSnackbar(it) }
-            viewModel.clearError()
+            onClearError()
         }
     }
 
@@ -80,7 +103,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = { viewModel.login(email, password, role) },
+                onClick = { onLogin(email, password) },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 enabled = !isLoading
             ) {
@@ -102,8 +125,14 @@ fun LoginScreen(
 @Composable
 fun LoginScreenPreview() {
     LawAppTheme {
-        // ViewModel gerektirmeyen basitleştirilmiş bir versiyon veya Preview için mocklanmış data
-        // Ancak LoginScreen hiltViewModel() kullandığı için doğrudan preview hata verebilir.
-        // Bu yüzden genellikle Screen içeriğini ayrı bir Composable'a (Stateless) ayırıp onu preview yapmak en iyisidir.
+        LoginScreenContent(
+            isLoading = false,
+            error = null,
+            loginSuccess = false,
+            onLogin = { _, _ -> },
+            onLoginSuccess = {},
+            onNavigateToRegister = {},
+            onClearError = {}
+        )
     }
 }
