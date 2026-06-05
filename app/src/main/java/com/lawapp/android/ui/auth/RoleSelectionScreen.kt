@@ -5,9 +5,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lawapp.android.ui.theme.LawAppTheme
 
 @Composable
 fun RoleSelectionScreen(
@@ -61,5 +63,13 @@ fun RoleSelectionScreen(
         ) {
             Text("Ben Müvekkilim", fontSize = 18.sp)
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun RoleSelectionScreenPreview() {
+    LawAppTheme {
+        RoleSelectionScreen(onRoleSelected = {})
     }
 }

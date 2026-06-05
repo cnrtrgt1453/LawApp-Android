@@ -12,10 +12,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lawapp.android.ui.theme.LawAppTheme
 
 data class CreditPackage(
     val name: String,
@@ -197,5 +199,13 @@ fun SubscriptionItem(pkg: CreditPackage, onClick: () -> Unit) {
                 Text(text = "Hemen Katıl", fontSize = 11.sp, color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun WalletScreenPreview() {
+    LawAppTheme {
+        WalletScreen(currentBalance = 1500, onPackageClick = {})
     }
 }

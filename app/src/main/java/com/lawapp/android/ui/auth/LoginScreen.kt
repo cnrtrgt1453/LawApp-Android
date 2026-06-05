@@ -7,8 +7,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lawapp.android.ui.theme.LawAppTheme
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 
@@ -93,5 +95,15 @@ fun LoginScreen(
                 Text("Hesabınız yok mu? Kayıt Olun")
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LoginScreenPreview() {
+    LawAppTheme {
+        // ViewModel gerektirmeyen basitleştirilmiş bir versiyon veya Preview için mocklanmış data
+        // Ancak LoginScreen hiltViewModel() kullandığı için doğrudan preview hata verebilir.
+        // Bu yüzden genellikle Screen içeriğini ayrı bir Composable'a (Stateless) ayırıp onu preview yapmak en iyisidir.
     }
 }
