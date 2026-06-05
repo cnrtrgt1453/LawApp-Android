@@ -2,6 +2,7 @@ package com.lawapp.android.data
 
 import com.lawapp.android.data.model.ChatMessageDto
 import io.ktor.client.plugins.websocket.*
+import io.ktor.client.request.header
 import io.ktor.http.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +26,17 @@ class ChatRepositoryImpl @Inject constructor() : ChatRepository {
         val token = TokenManager.token ?: return@flow
 
         try {
-            client.webSocket(method = HttpMethod.Get, host = "10.0.2.2", port = 8080, path = "/ws/chat?token=$token") {
+            // JWT token'ı URL'ye eklemek yerine Sec-WebSocket-Protocol header'ı ile gönderiyoruz.
+            // Bu sayede token sunucu loglarında, reverse proxy kayıtlarında veya ağ izleyicilerinde görünmez.
+            client.webSocket(
+                method = HttpMethod.Get,
+                host = "10.0.2.2",
+                port = 8080,
+                path = "/ws/chat",
+                request = {
+                    header(HttpHeaders.SecWebSocketProtocol, "bearer.$token")
+                }
+            ) {
                 webSocketSession = this
                 
                 for (frame in incoming) {

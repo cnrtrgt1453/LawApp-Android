@@ -17,7 +17,7 @@ object NetworkClient {
             })
         }
         install(Logging) {
-            level = LogLevel.BODY
+            level = LogLevel.HEADERS // BODY seviyesi hassas verileri loglar, üretimde NONE kullanılmalıdır
         }
         install(WebSockets)
     }
