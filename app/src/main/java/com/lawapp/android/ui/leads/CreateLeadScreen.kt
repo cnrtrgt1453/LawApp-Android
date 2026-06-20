@@ -14,9 +14,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+import com.lawapp.android.ui.client.ClientViewModel
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateLeadScreen(
+    viewModel: ClientViewModel,
     onLeadCreated: () -> Unit
 ) {
     var title by remember { mutableStateOf("") }
@@ -110,7 +113,11 @@ fun CreateLeadScreen(
         Spacer(modifier = Modifier.height(32.dp))
         
         Button(
-            onClick = { onLeadCreated() },
+            onClick = { 
+                viewModel.createLead(title, description, selectedCategory, city) {
+                    onLeadCreated()
+                }
+            },
             modifier = Modifier.fillMaxWidth().height(56.dp)
         ) {
             Text("İlanı Yayınla", fontSize = 18.sp)

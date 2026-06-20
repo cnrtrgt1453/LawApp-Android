@@ -301,8 +301,8 @@ fun ClientScaffold(
             }
             composable(Routes.CREATE_LEAD) {
                 CreateLeadScreen(
+                    viewModel = viewModel,
                     onLeadCreated = {
-                        viewModel.fetchMyLeads()
                         navController.navigate(Routes.CLIENT_HOME) {
                             popUpTo(Routes.CLIENT_HOME) { inclusive = true }
                         }

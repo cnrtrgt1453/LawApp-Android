@@ -30,10 +30,11 @@ class ChatRepositoryImpl @Inject constructor() : ChatRepository {
             // Bu sayede token sunucu loglarında, reverse proxy kayıtlarında veya ağ izleyicilerinde görünmez.
             client.webSocket(
                 method = HttpMethod.Get,
-                host = "10.0.2.2",
-                port = 8080,
+                host = NetworkClient.HOST,
+                port = NetworkClient.PORT,
                 path = "/ws/chat",
                 request = {
+                    url.protocol = if (NetworkClient.IS_SECURE) URLProtocol.WSS else URLProtocol.WS
                     header(HttpHeaders.SecWebSocketProtocol, "bearer.$token")
                 }
             ) {
