@@ -9,9 +9,9 @@ import kotlinx.serialization.json.Json
 
 object NetworkClient {
     // Canlıya çıkarken HOST ve IS_SECURE değerlerini değiştirmeniz yeterli olacaktır
-    const val HOST = "10.0.2.2" // Canlıda örn: "api.lawapp.com"
-    const val PORT = 8080        // Canlıda standart HTTPS/WSS için 443 veya portsuz kullanımda null
-    const val IS_SECURE = false  // Canlıda güvenli HTTPS ve WSS için true yapın
+    const val HOST = "api.lawapp.io" // Canlı domain adresiniz
+    const val PORT = 443              // HTTPS standart portu
+    const val IS_SECURE = true        // Canlıda güvenli HTTPS/WSS için true
 
     val client = HttpClient {
         install(ContentNegotiation) {
