@@ -26,7 +26,8 @@ import com.lawapp.android.ui.theme.LawAppTheme
 
 @Composable
 fun ClientProfileScreen(
-    viewModel: ClientProfileViewModel = hiltViewModel()
+    viewModel: ClientProfileViewModel = hiltViewModel(),
+    onLogout: () -> Unit = {}
 ) {
     val profile by viewModel.profile.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -36,7 +37,8 @@ fun ClientProfileScreen(
         profile = profile,
         isLoading = isLoading,
         error = error,
-        onUpdateProfile = { bio -> viewModel.updateProfile(bio) }
+        onUpdateProfile = { bio -> viewModel.updateProfile(bio) },
+        onLogout = onLogout
     )
 }
 
@@ -46,7 +48,8 @@ fun ClientProfileScreenContent(
     profile: ClientProfile?,
     isLoading: Boolean,
     error: String?,
-    onUpdateProfile: (String) -> Unit
+    onUpdateProfile: (String) -> Unit,
+    onLogout: () -> Unit = {}
 ) {
     var bio by remember { mutableStateOf("") }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
@@ -162,6 +165,16 @@ fun ClientProfileScreenContent(
                     color = MaterialTheme.colorScheme.secondary,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                OutlinedButton(
+                    onClick = onLogout,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Çıkış Yap")
+                }
             }
         }
     }

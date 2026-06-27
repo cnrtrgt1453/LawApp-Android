@@ -30,7 +30,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LawyerProfileScreen(
-    viewModel: ProfileViewModel = hiltViewModel()
+    viewModel: ProfileViewModel = hiltViewModel(),
+    onLogout: () -> Unit = {}
 ) {
     val profile by viewModel.profile.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -230,6 +231,16 @@ fun LawyerProfileScreen(
                     } else {
                         Text("Değişiklikleri Kaydet", fontSize = 16.sp, modifier = Modifier.padding(8.dp))
                     }
+                }
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                OutlinedButton(
+                    onClick = onLogout,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Çıkış Yap")
                 }
             }
         }

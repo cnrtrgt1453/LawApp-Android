@@ -70,7 +70,8 @@ val clientBottomNavItems = listOf(
 @Composable
 fun LawyerScaffold(
     navController: NavHostController,
-    onStartCall: (String) -> Unit
+    onStartCall: (String) -> Unit,
+    onLogout: () -> Unit = {}
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -173,7 +174,7 @@ fun LawyerScaffold(
                 )
             }
             composable(Routes.LAWYER_PROFILE) {
-                LawyerProfileScreen()
+                LawyerProfileScreen(onLogout = onLogout)
             }
         }
     }
@@ -183,7 +184,8 @@ fun LawyerScaffold(
 @Composable
 fun ClientScaffold(
     navController: NavHostController,
-    onStartCall: (String) -> Unit
+    onStartCall: (String) -> Unit,
+    onLogout: () -> Unit = {}
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -360,7 +362,7 @@ fun ClientScaffold(
                 )
             }
             composable(Routes.CLIENT_PROFILE) {
-                ClientProfileScreen()
+                ClientProfileScreen(onLogout = onLogout)
             }
         }
     }
@@ -384,7 +386,8 @@ fun LawAppNavGraph() {
             val role = backStackEntry.arguments?.getString("role") ?: "CLIENT"
             LoginScreen(
                 onLoginSuccess = {
-                    val destination = if (role == "LAWYER") "lawyer_main" else "client_main"
+                    val actualRole = com.lawapp.android.data.TokenManager.role ?: role
+                    val destination = if (actualRole == "LAWYER" || actualRole == "ROLE_LAWYER") "lawyer_main" else "client_main"
                     rootNavController.navigate(destination) {
                         popUpTo(Routes.ROLE_SELECTION) { inclusive = true }
                     }
@@ -402,7 +405,8 @@ fun LawAppNavGraph() {
             RegisterScreen(
                 selectedRole = role,
                 onRegisterSuccess = {
-                    val destination = if (role == "LAWYER") "lawyer_main" else "client_main"
+                    val actualRole = com.lawapp.android.data.TokenManager.role ?: role
+                    val destination = if (actualRole == "LAWYER" || actualRole == "ROLE_LAWYER") "lawyer_main" else "client_main"
                     rootNavController.navigate(destination) {
                         popUpTo(Routes.ROLE_SELECTION) { inclusive = true }
                     }
@@ -417,6 +421,12 @@ fun LawAppNavGraph() {
                 navController = rememberNavController(),
                 onStartCall = { partnerName ->
                     rootNavController.navigate("video_call/$partnerName")
+                },
+                onLogout = {
+                    com.lawapp.android.data.TokenManager.clear()
+                    rootNavController.navigate(Routes.ROLE_SELECTION) {
+                        popUpTo(0) { inclusive = true }
+                    }
                 }
             )
         }
@@ -425,6 +435,12 @@ fun LawAppNavGraph() {
                 navController = rememberNavController(),
                 onStartCall = { partnerName ->
                     rootNavController.navigate("video_call/$partnerName")
+                },
+                onLogout = {
+                    com.lawapp.android.data.TokenManager.clear()
+                    rootNavController.navigate(Routes.ROLE_SELECTION) {
+                        popUpTo(0) { inclusive = true }
+                    }
                 }
             )
         }

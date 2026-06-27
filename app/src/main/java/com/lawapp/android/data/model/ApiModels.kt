@@ -16,7 +16,7 @@ data class RegisterRequest(
 )
 
 @Serializable
-data class AuthResponse(val token: String)
+data class AuthResponse(val token: String, val role: String? = null)
 
 // --- Lead ---
 @Serializable

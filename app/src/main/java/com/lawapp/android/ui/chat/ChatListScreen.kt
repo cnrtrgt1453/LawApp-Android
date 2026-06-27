@@ -166,7 +166,7 @@ fun ChatSessionItem(
                     modifier = Modifier.padding(2.dp)
                 ) {
                     Text(
-                        text = if (session.otherParticipantRole == "LAWYER") "Avukat" else "Müvekkil",
+                        text = if (session.otherParticipantRole == "LAWYER") "Avukat" else "Vatandaş",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = if (session.otherParticipantRole == "LAWYER")
@@ -258,7 +258,7 @@ fun ChatListScreenPreview() {
                     id = 2,
                     leadId = 102,
                     leadTitle = "Boşanma Protokolü",
-                    otherParticipantName = "Müvekkil Ayşe Demir",
+                    otherParticipantName = "Vatandaş Ayşe Demir",
                     otherParticipantRole = "CLIENT",
                     lastMessage = "Tamamdır, teşekkürler.",
                     lastMessageTime = "10:15",

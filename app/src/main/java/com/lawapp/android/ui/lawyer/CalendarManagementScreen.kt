@@ -87,7 +87,7 @@ fun CalendarManagementScreen(
                             tint = MaterialTheme.colorScheme.primary
                         )
                         Text(
-                            text = "Müvekkillerinizin sizden görüntülü görüşme randevusu alabilmesi için aşağıdan uygun olduğunuz gün ve saat dilimlerini takviminize ekleyin.",
+                            text = "Vatandaşların sizden görüntülü görüşme randevusu alabilmesi için aşağıdan uygun olduğunuz gün ve saat dilimlerini takviminize ekleyin.",
                             fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSecondaryContainer,
                             lineHeight = 18.sp

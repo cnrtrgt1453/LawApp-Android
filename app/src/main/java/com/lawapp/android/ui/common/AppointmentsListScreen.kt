@@ -199,7 +199,7 @@ fun AppointmentItem(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = if (role == "CLIENT") "Avukat: Av. ${appointment.lawyerName}" else "Müvekkil: ${appointment.clientName}",
+                text = if (role == "CLIENT") "Avukat: Av. ${appointment.lawyerName}" else "Vatandaş: ${appointment.clientName}",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold
             )
@@ -287,7 +287,7 @@ fun AppointmentItem(
                             Icon(Icons.Default.Call, contentDescription = "Telefon", tint = MaterialTheme.colorScheme.onPrimaryContainer)
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = if (isCallActive) "Müvekkilin Araması Bekleniyor..." else "Randevu saatinde müvekkil arayacaktır.",
+                                text = if (isCallActive) "Vatandaşın Araması Bekleniyor..." else "Randevu saatinde vatandaş arayacaktır.",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer

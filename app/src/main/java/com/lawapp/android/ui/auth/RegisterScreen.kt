@@ -59,7 +59,7 @@ fun RegisterScreenContent(
     onNavigateToLogin: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val roleText = if (selectedRole == "LAWYER") "Avukat Kaydı" else "Müvekkil Kaydı"
+    val roleText = if (selectedRole == "LAWYER") "Avukat Kaydı" else "Vatandaş Kaydı"
 
     Column(
         modifier = modifier

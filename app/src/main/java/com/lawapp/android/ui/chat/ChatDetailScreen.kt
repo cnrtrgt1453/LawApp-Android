@@ -79,7 +79,7 @@ fun ChatDetailScreen(
                         modifier = Modifier.padding(end = 12.dp)
                     ) {
                         Text(
-                            text = if (partnerRole == "LAWYER") "Avukat" else "Müvekkil",
+                            text = if (partnerRole == "LAWYER") "Avukat" else "Vatandaş",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = if (partnerRole == "LAWYER") Color(0xFF1565C0) else Color(0xFF2E7D32),
@@ -233,7 +233,7 @@ fun ChatDetailScreenPreview() {
                     id = 1,
                     sessionId = 100,
                     senderEmail = "client@example.com",
-                    senderName = "Müvekkil Can",
+                    senderName = "Vatandaş Can",
                     content = "Merhaba Ahmet Bey, dava süreci hakkında bilgi alabilir miyim?",
                     createdAt = "2023-10-27T10:00:00"
                 ),
@@ -249,7 +249,7 @@ fun ChatDetailScreenPreview() {
                     id = 3,
                     sessionId = 100,
                     senderEmail = "client@example.com",
-                    senderName = "Müvekkil Can",
+                    senderName = "Vatandaş Can",
                     content = "Teşekkür ederim, bekliyorum.",
                     createdAt = "2023-10-27T10:06:00"
                 )

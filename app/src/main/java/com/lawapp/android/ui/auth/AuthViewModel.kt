@@ -31,7 +31,7 @@ class AuthViewModel @Inject constructor(
             _error.value = null
             try {
                 val response = apiService.login(email, password)
-                TokenManager.saveToken(response.token, role)
+                TokenManager.saveToken(response.token, response.role ?: role)
                 _loginSuccess.value = true
             } catch (e: Exception) {
                 _error.value = "Giriş başarısız: ${e.localizedMessage}"
@@ -48,7 +48,7 @@ class AuthViewModel @Inject constructor(
             try {
                 val request = RegisterRequest(fullName, email, password, phone, role)
                 val response = apiService.register(request)
-                TokenManager.saveToken(response.token, role)
+                TokenManager.saveToken(response.token, response.role ?: role)
                 _loginSuccess.value = true
             } catch (e: Exception) {
                 _error.value = "Kayıt başarısız: ${e.localizedMessage}"

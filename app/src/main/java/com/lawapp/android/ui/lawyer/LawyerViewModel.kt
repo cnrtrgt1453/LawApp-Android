@@ -122,7 +122,7 @@ class LawyerViewModel @Inject constructor(
             _isLoading.value = true
             try {
                 apiService.rejectAppointment(appointmentId)
-                _successMessage.value = "Randevu reddedildi ve ücret müvekkile iade edildi."
+                _successMessage.value = "Randevu reddedildi ve ücret vatandaşa iade edildi."
                 fetchAppointments()
                 fetchCalendarSlots() // Slotu tekrar boşa çıkar
             } catch (e: Exception) {

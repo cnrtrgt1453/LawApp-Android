@@ -61,7 +61,7 @@ fun RoleSelectionScreen(
             onClick = { onRoleSelected("CLIENT") },
             modifier = Modifier.fillMaxWidth().height(56.dp)
         ) {
-            Text("Ben Müvekkilim", fontSize = 18.sp)
+            Text("Ben Vatandaşım", fontSize = 18.sp)
         }
     }
 }

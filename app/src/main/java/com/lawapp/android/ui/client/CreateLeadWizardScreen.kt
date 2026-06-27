@@ -170,7 +170,7 @@ fun CreateLeadWizardScreen(
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    text = "LawApp, müvekkil gizliliğine ve sır saklama yükümlülüklerine saygı duyar. Girdiğiniz bilgiler kesinlikle kamuya açık paylaşılmaz. Sadece onaylayacağınız doğrulanmış avukata kademeli olarak gösterilir.",
+                                    text = "LawApp, vatandaş gizliliğine ve sır saklama yükümlülüklerine saygı duyar. Girdiğiniz bilgiler kesinlikle kamuya açık paylaşılmaz. Sadece onaylayacağınız doğrulanmış avukata kademeli olarak gösterilir.",
                                     fontSize = 13.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
