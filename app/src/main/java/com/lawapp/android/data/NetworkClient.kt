@@ -8,10 +8,11 @@ import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
 object NetworkClient {
-    // Canlıya çıkarken HOST ve IS_SECURE değerlerini değiştirmeniz yeterli olacaktır
-    const val HOST = "api.lawapp.io" // Canlı domain adresiniz
-    const val PORT = 443              // HTTPS standart portu
-    const val IS_SECURE = true        // Canlıda güvenli HTTPS/WSS için true
+    // Localhost testi için: 10.0.2.2 (Android Emulator'ün bilgisayarınıza erişim adresi)
+    // Canlı için: "api.lawapp.io"
+    const val HOST = "api.lawapp.io" 
+    const val IS_SECURE = true   // Canlı için true, yerel için false
+    val PORT: Int? = if (IS_SECURE) null else 8080        // Yerel backend portunuz (Örn: 8080, 3000), canlıda null
 
     val client = HttpClient {
         install(ContentNegotiation) {
