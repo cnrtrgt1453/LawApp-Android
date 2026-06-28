@@ -15,12 +15,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lawapp.android.ui.theme.LawAppTheme
+import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun RegisterScreen(
     selectedRole: String,
     onRegisterSuccess: () -> Unit,
     onNavigateToLogin: () -> Unit,
+    viewModel: AuthViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
     var fullName by remember { mutableStateOf("") }
@@ -28,20 +31,52 @@ fun RegisterScreen(
     var password by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
 
-    RegisterScreenContent(
-        selectedRole = selectedRole,
-        fullName = fullName,
-        email = email,
-        password = password,
-        phone = phone,
-        onFullNameChange = { fullName = it },
-        onEmailChange = { email = it },
-        onPasswordChange = { password = it },
-        onPhoneChange = { phone = it },
-        onRegisterClick = onRegisterSuccess,
-        onNavigateToLogin = onNavigateToLogin,
+    val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
+    val registerSuccess by viewModel.loginSuccess.collectAsState()
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(registerSuccess) {
+        if (registerSuccess) {
+            onRegisterSuccess()
+        }
+    }
+
+    LaunchedEffect(error) {
+        error?.let {
+            scope.launch { snackbarHostState.showSnackbar(it) }
+            viewModel.clearError()
+        }
+    }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         modifier = modifier
-    )
+    ) { padding ->
+        RegisterScreenContent(
+            selectedRole = selectedRole,
+            fullName = fullName,
+            email = email,
+            password = password,
+            phone = phone,
+            onFullNameChange = { fullName = it },
+            onEmailChange = { email = it },
+            onPasswordChange = { password = it },
+            onPhoneChange = { phone = it },
+            onRegisterClick = {
+                if (fullName.isBlank() || email.isBlank() || password.isBlank() || phone.isBlank()) {
+                    scope.launch { snackbarHostState.showSnackbar("Lütfen tüm alanları doldurun.") }
+                } else {
+                    viewModel.register(fullName, email, password, phone, selectedRole)
+                }
+            },
+            onNavigateToLogin = onNavigateToLogin,
+            isLoading = isLoading,
+            modifier = Modifier.padding(padding)
+        )
+    }
 }
 
 @Composable
@@ -57,6 +92,7 @@ fun RegisterScreenContent(
     onPhoneChange: (String) -> Unit,
     onRegisterClick: () -> Unit,
     onNavigateToLogin: () -> Unit,
+    isLoading: Boolean,
     modifier: Modifier = Modifier
 ) {
     val roleText = if (selectedRole == "LAWYER") "Avukat Kaydı" else "Vatandaş Kaydı"
@@ -83,7 +119,8 @@ fun RegisterScreenContent(
             onValueChange = onFullNameChange,
             label = { Text("Ad Soyad") },
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            singleLine = true,
+            enabled = !isLoading
         )
         
         Spacer(modifier = Modifier.height(16.dp))
@@ -94,7 +131,8 @@ fun RegisterScreenContent(
             label = { Text("E-posta") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            singleLine = true
+            singleLine = true,
+            enabled = !isLoading
         )
         
         Spacer(modifier = Modifier.height(16.dp))
@@ -106,7 +144,8 @@ fun RegisterScreenContent(
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            singleLine = true
+            singleLine = true,
+            enabled = !isLoading
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -117,19 +156,25 @@ fun RegisterScreenContent(
             label = { Text("Telefon Numarası") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-            singleLine = true
+            singleLine = true,
+            enabled = !isLoading
         )
         
         Spacer(modifier = Modifier.height(32.dp))
         
         Button(
             onClick = onRegisterClick,
-            modifier = Modifier.fillMaxWidth().height(56.dp)
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            enabled = !isLoading
         ) {
-            Text("Kayıt Ol", fontSize = 18.sp)
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
+            } else {
+                Text("Kayıt Ol", fontSize = 18.sp)
+            }
         }
         
-        TextButton(onClick = onNavigateToLogin) {
+        TextButton(onClick = onNavigateToLogin, enabled = !isLoading) {
             Text("Zaten hesabınız var mı? Giriş Yapın")
         }
     }
@@ -154,7 +199,8 @@ fun RegisterScreenPreview() {
                 onPasswordChange = {},
                 onPhoneChange = {},
                 onRegisterClick = {},
-                onNavigateToLogin = {}
+                onNavigateToLogin = {},
+                isLoading = false
             )
         }
     }

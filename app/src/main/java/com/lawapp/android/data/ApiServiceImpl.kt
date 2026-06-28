@@ -20,7 +20,7 @@ class ApiServiceImpl @Inject constructor() : ApiService {
     }
 
     override suspend fun login(email: String, password: String): AuthResponse {
-        val response = client.post("$baseUrl/auth/login") {
+        val response = client.post("$baseUrl/auth/signin") {
             contentType(ContentType.Application.Json)
             setBody(LoginRequest(email, password))
         }
@@ -28,7 +28,7 @@ class ApiServiceImpl @Inject constructor() : ApiService {
     }
 
     override suspend fun register(request: RegisterRequest): AuthResponse {
-        val response = client.post("$baseUrl/auth/register") {
+        val response = client.post("$baseUrl/auth/signup") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }
