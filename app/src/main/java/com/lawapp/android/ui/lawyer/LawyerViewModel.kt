@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.lawapp.android.data.ApiService
 import com.lawapp.android.data.model.AppointmentDto
 import com.lawapp.android.data.model.CalendarSlotDto
+import com.lawapp.android.data.model.LeadDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -24,6 +25,10 @@ class LawyerViewModel @Inject constructor(
     private val _appointments = MutableStateFlow<List<AppointmentDto>>(emptyList())
     val appointments: StateFlow<List<AppointmentDto>> = _appointments
 
+    // --- Leads (İlan Havuzu) ---
+    private val _allLeads = MutableStateFlow<List<LeadDto>>(emptyList())
+    val allLeads: StateFlow<List<LeadDto>> = _allLeads
+
     // --- State ---
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -38,6 +43,20 @@ class LawyerViewModel @Inject constructor(
         // Avukat detaylarını yükle
         fetchCalendarSlots()
         fetchAppointments()
+        fetchAllLeads()
+    }
+
+    fun fetchAllLeads() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                _allLeads.value = apiService.getAllLeads()
+            } catch (e: Exception) {
+                _error.value = "İlan havuzu yüklenemedi: ${e.localizedMessage}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
     }
 
     fun fetchCalendarSlots() {

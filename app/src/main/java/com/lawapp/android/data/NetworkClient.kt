@@ -8,11 +8,10 @@ import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
 object NetworkClient {
-    // Localhost testi için: 10.0.2.2 (Android Emulator'ün bilgisayarınıza erişim adresi)
-    // Canlı için: "api.lawapp.io"
+    // Sunucu (Production) Ayarları
     const val HOST = "api.lawapp.io" 
-    const val IS_SECURE = true   // Canlı için true, yerel için false
-    val PORT: Int? = if (IS_SECURE) null else 8080        // Yerel backend portunuz (Örn: 8080, 3000), canlıda null
+    const val IS_SECURE = true   
+    val PORT: Int? = null 
 
     val client = HttpClient {
         install(ContentNegotiation) {
@@ -23,10 +22,11 @@ object NetworkClient {
             })
         }
         install(Logging) {
-            level = if (IS_SECURE) LogLevel.NONE else LogLevel.HEADERS // Canlıda logları kapatıyoruz
+            // Canlıda güvenlik için logları kapatıyoruz
+            level = LogLevel.NONE 
         }
         install(WebSockets)
     }
     
-    val BASE_URL = if (IS_SECURE) "https://$HOST/api" else "http://$HOST:$PORT/api"
+    val BASE_URL = "https://$HOST/api"
 }
