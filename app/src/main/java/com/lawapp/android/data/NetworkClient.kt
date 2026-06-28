@@ -8,10 +8,10 @@ import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
 object NetworkClient {
-    // Sunucu (Production) Ayarları
-    const val HOST = "api.lawapp.io" 
-    const val IS_SECURE = true   
-    val PORT: Int? = null 
+    // Yeni Sunucu Ayarları
+    const val HOST = "89.167.75.213" 
+    const val IS_SECURE = false   // IP üzerinden direkt bağlantıda genellikle SSL yoktur, HTTP kullanılır
+    val PORT: Int? = 8080         // Sunucudaki Spring Boot portunuz (varsayılan 8080)
 
     val client = HttpClient {
         install(ContentNegotiation) {
@@ -28,5 +28,5 @@ object NetworkClient {
         install(WebSockets)
     }
     
-    val BASE_URL = "https://$HOST/api"
+    val BASE_URL = if (IS_SECURE) "https://$HOST/api" else "http://$HOST:$PORT/api"
 }
