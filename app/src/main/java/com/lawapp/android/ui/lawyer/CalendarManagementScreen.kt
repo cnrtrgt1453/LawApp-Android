@@ -2,8 +2,8 @@ package com.lawapp.android.ui.lawyer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -67,6 +67,7 @@ fun CalendarManagementScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
@@ -200,11 +201,11 @@ fun CalendarManagementScreen(
                     val displayFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy - HH:mm")
                     val inputFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
                     
-                    LazyColumn(
+                    Column(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(slots) { slot ->
+                        slots.forEach { slot ->
                             val time = try {
                                 LocalDateTime.parse(slot.slotTime, inputFormatter).format(displayFormatter)
                             } catch (e: Exception) {
