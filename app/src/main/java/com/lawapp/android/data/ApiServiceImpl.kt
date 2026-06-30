@@ -7,6 +7,11 @@ import io.ktor.http.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
+
 @Singleton
 class ApiServiceImpl @Inject constructor() : ApiService {
 
@@ -146,5 +151,35 @@ class ApiServiceImpl @Inject constructor() : ApiService {
 
     override suspend fun markMessagesAsRead(sessionId: Long) {
         client.post("$baseUrl/chats/$sessionId/read") { auth() }
+    }
+
+    override suspend fun uploadProfileImage(bytes: ByteArray, fileName: String): String {
+        val response = client.post("$baseUrl/profile/upload-image") {
+            auth()
+            setBody(MultiPartFormDataContent(
+                formData {
+                    append("file", bytes, Headers.build {
+                        append(HttpHeaders.ContentType, "image/jpeg")
+                        append(HttpHeaders.ContentDisposition, "filename=\"$fileName\"")
+                    })
+                }
+            ))
+        }
+        return response.body()
+    }
+
+    override suspend fun uploadIntroVideo(bytes: ByteArray, fileName: String): String {
+        val response = client.post("$baseUrl/profile/upload-video") {
+            auth()
+            setBody(MultiPartFormDataContent(
+                formData {
+                    append("file", bytes, Headers.build {
+                        append(HttpHeaders.ContentType, "video/mp4")
+                        append(HttpHeaders.ContentDisposition, "filename=\"$fileName\"")
+                    })
+                }
+            ))
+        }
+        return response.body()
     }
 }

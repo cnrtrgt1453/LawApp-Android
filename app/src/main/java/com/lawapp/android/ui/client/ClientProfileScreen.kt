@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.lawapp.android.data.model.ClientProfile
 import com.lawapp.android.ui.theme.LawAppTheme
+import coil.compose.AsyncImage
 
 @Composable
 fun ClientProfileScreen(
@@ -38,6 +39,7 @@ fun ClientProfileScreen(
         isLoading = isLoading,
         error = error,
         onUpdateProfile = { bio -> viewModel.updateProfile(bio) },
+        onUploadPhoto = { uri -> viewModel.uploadProfileImage(uri) },
         onLogout = onLogout
     )
 }
@@ -49,6 +51,7 @@ fun ClientProfileScreenContent(
     isLoading: Boolean,
     error: String?,
     onUpdateProfile: (String) -> Unit,
+    onUploadPhoto: (Uri) -> Unit,
     onLogout: () -> Unit = {}
 ) {
     var bio by remember { mutableStateOf("") }
@@ -62,7 +65,12 @@ fun ClientProfileScreenContent(
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> selectedImageUri = uri }
+        onResult = { uri -> 
+            uri?.let {
+                selectedImageUri = it
+                onUploadPhoto(it)
+            }
+        }
     )
 
     Scaffold(
@@ -105,12 +113,22 @@ fun ClientProfileScreenContent(
                             .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape),
                         color = MaterialTheme.colorScheme.surfaceVariant
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.AddAPhoto,
-                            contentDescription = null,
-                            modifier = Modifier.padding(40.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        val imageModel = selectedImageUri ?: profile?.profileImageUrl
+                        if (imageModel != null) {
+                            AsyncImage(
+                                model = imageModel,
+                                contentDescription = "Profil Fotoğrafı",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.AddAPhoto,
+                                contentDescription = null,
+                                modifier = Modifier.padding(40.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                     
                     IconButton(
@@ -192,7 +210,8 @@ fun ClientProfileScreenPreview() {
             ),
             isLoading = false,
             error = null,
-            onUpdateProfile = {}
+            onUpdateProfile = {},
+            onUploadPhoto = {}
         )
     }
 }

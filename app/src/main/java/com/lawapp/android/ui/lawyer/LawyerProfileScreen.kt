@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,12 +58,22 @@ fun LawyerProfileScreen(
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> selectedImageUri = uri }
+        onResult = { uri -> 
+            uri?.let {
+                selectedImageUri = it
+                viewModel.uploadProfileImage(it)
+            }
+        }
     )
 
     val videoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> selectedVideoUri = uri }
+        onResult = { uri -> 
+            uri?.let {
+                selectedVideoUri = it
+                viewModel.uploadIntroVideo(it)
+            }
+        }
     )
 
     Scaffold(
@@ -105,9 +116,14 @@ fun LawyerProfileScreen(
                             .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape),
                         color = MaterialTheme.colorScheme.surfaceVariant
                     ) {
-                        if (selectedImageUri != null) {
-                            // Gerçek uygulamada AsyncImage kullanılır
-                            Icon(imageVector = Icons.Default.AddAPhoto, contentDescription = null, modifier = Modifier.padding(32.dp))
+                        val imageModel = selectedImageUri ?: profile?.profileImageUrl
+                        if (imageModel != null) {
+                            AsyncImage(
+                                model = imageModel,
+                                contentDescription = "Profil Fotoğrafı",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
                         } else {
                             Icon(
                                 imageVector = Icons.Default.AddAPhoto,
