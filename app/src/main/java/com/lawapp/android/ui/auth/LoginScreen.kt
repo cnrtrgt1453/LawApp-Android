@@ -5,6 +5,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,6 +31,8 @@ fun LoginScreen(
         error = error,
         loginSuccess = loginSuccess,
         onLogin = { email, password -> viewModel.login(email, password, role) },
+        onLoginWithGoogle = { token -> viewModel.loginWithGoogle(token, role) },
+        onLoginWithFacebook = { token -> viewModel.loginWithFacebook(token, role) },
         onLoginSuccess = onLoginSuccess,
         onNavigateToRegister = onNavigateToRegister,
         onClearError = { viewModel.clearError() }
@@ -42,6 +45,8 @@ fun LoginScreenContent(
     error: String?,
     loginSuccess: Boolean,
     onLogin: (String, String) -> Unit,
+    onLoginWithGoogle: (String) -> Unit,
+    onLoginWithFacebook: (String) -> Unit,
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit,
     onClearError: () -> Unit
@@ -52,12 +57,10 @@ fun LoginScreenContent(
 
     val scope = rememberCoroutineScope()
 
-    // Karar-5: Login başarılıysa navigasyonu tetikle
     LaunchedEffect(loginSuccess) {
         if (loginSuccess) onLoginSuccess()
     }
 
-    // Karar-6: Hata mesajını Snackbar ile göster
     LaunchedEffect(error) {
         error?.let {
             scope.launch { snackbarHostState.showSnackbar(it) }
@@ -104,15 +107,51 @@ fun LoginScreenContent(
 
             Button(
                 onClick = { onLogin(email, password) },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                enabled = !isLoading
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                enabled = !isLoading,
+                shape = MaterialTheme.shapes.medium
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
                 } else {
-                    Text("Giriş", fontSize = 18.sp)
+                    Text("E-posta ile Giriş", fontSize = 16.sp)
                 }
             }
+
+            // --- VEYA AYIRACI ---
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Divider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
+                Text("veya", modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.secondary, fontSize = 14.sp)
+                Divider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
+            }
+
+            // --- SOSYAL MEDYA GİRİŞ BUTONLARI ---
+            Button(
+                onClick = { onLoginWithGoogle("mock-google-token") },
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF1F1F1), contentColor = Color.Black),
+                shape = MaterialTheme.shapes.medium,
+                enabled = !isLoading
+            ) {
+                Text("Google ile Devam Et", fontWeight = FontWeight.Medium, fontSize = 15.sp)
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = { onLoginWithFacebook("mock-facebook-token") },
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1877F2), contentColor = Color.White),
+                shape = MaterialTheme.shapes.medium,
+                enabled = !isLoading
+            ) {
+                Text("Facebook ile Devam Et", fontWeight = FontWeight.Medium, fontSize = 15.sp)
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
 
             TextButton(onClick = onNavigateToRegister) {
                 Text("Hesabınız yok mu? Kayıt Olun")
@@ -130,6 +169,8 @@ fun LoginScreenPreview() {
             error = null,
             loginSuccess = false,
             onLogin = { _, _ -> },
+            onLoginWithGoogle = {},
+            onLoginWithFacebook = {},
             onLoginSuccess = {},
             onNavigateToRegister = {},
             onClearError = {}

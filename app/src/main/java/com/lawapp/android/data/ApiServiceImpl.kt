@@ -169,4 +169,18 @@ class ApiServiceImpl @Inject constructor() : ApiService {
         }
         return response.body()
     }
+
+    override suspend fun googleLogin(token: String, role: String): AuthResponse {
+        return client.post("$baseUrl/auth/google") {
+            contentType(io.ktor.http.ContentType.Application.Json)
+            setBody(SocialLoginRequest(token, role))
+        }.body()
+    }
+
+    override suspend fun facebookLogin(token: String, role: String): AuthResponse {
+        return client.post("$baseUrl/auth/facebook") {
+            contentType(io.ktor.http.ContentType.Application.Json)
+            setBody(SocialLoginRequest(token, role))
+        }.body()
+    }
 }

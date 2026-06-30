@@ -41,6 +41,38 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    fun loginWithGoogle(token: String, role: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            try {
+                val response = apiService.googleLogin(token, role)
+                TokenManager.saveToken(response.token, response.role ?: role)
+                _loginSuccess.value = true
+            } catch (e: Exception) {
+                _error.value = "Google Girişi başarısız: ${e.localizedMessage}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun loginWithFacebook(token: String, role: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            try {
+                val response = apiService.facebookLogin(token, role)
+                TokenManager.saveToken(response.token, response.role ?: role)
+                _loginSuccess.value = true
+            } catch (e: Exception) {
+                _error.value = "Facebook Girişi başarısız: ${e.localizedMessage}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
     fun register(fullName: String, email: String, password: String, phone: String, role: String) {
         viewModelScope.launch {
             _isLoading.value = true

@@ -25,4 +25,6 @@ interface ApiService {
     suspend fun getChatSessions(): List<ChatSessionDto>
     suspend fun getChatMessages(sessionId: Long): List<ChatMessageDto>
     suspend fun markMessagesAsRead(sessionId: Long)
+    suspend fun googleLogin(token: String, role: String): AuthResponse
+    suspend fun facebookLogin(token: String, role: String): AuthResponse
 }

@@ -109,3 +109,6 @@ data class LawyerDto(
     val instagramUrl: String? = null,
     val websiteUrl: String? = null
 )
+
+@Serializable
+data class SocialLoginRequest(val token: String, val role: String)
