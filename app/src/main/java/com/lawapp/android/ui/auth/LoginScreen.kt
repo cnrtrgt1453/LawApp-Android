@@ -6,11 +6,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lawapp.android.R
 import com.lawapp.android.ui.theme.LawAppTheme
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
@@ -136,7 +138,19 @@ fun LoginScreenContent(
                 shape = MaterialTheme.shapes.medium,
                 enabled = !isLoading
             ) {
-                Text("Google ile Devam Et", fontWeight = FontWeight.Medium, fontSize = 15.sp)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_google),
+                        contentDescription = "Google",
+                        modifier = Modifier.size(20.dp),
+                        tint = Color.Unspecified
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text("Google ile Devam Et", fontWeight = FontWeight.Medium, fontSize = 15.sp)
+                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -148,7 +162,19 @@ fun LoginScreenContent(
                 shape = MaterialTheme.shapes.medium,
                 enabled = !isLoading
             ) {
-                Text("Facebook ile Devam Et", fontWeight = FontWeight.Medium, fontSize = 15.sp)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_facebook),
+                        contentDescription = "Facebook",
+                        modifier = Modifier.size(20.dp),
+                        tint = Color.Unspecified
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text("Facebook ile Devam Et", fontWeight = FontWeight.Medium, fontSize = 15.sp)
+                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
