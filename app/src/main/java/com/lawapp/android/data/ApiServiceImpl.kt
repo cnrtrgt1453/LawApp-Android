@@ -11,6 +11,8 @@ import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 @Singleton
 class ApiServiceImpl @Inject constructor() : ApiService {
@@ -134,7 +136,7 @@ class ApiServiceImpl @Inject constructor() : ApiService {
         val response = client.put("$baseUrl/profile/client") {
             auth()
             contentType(ContentType.Application.Json)
-            setBody(bio)
+            setBody(Json.encodeToString(bio))
         }
         return response.body()
     }
