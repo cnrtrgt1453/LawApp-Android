@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 import com.lawapp.android.ui.client.ClientViewModel
+import com.lawapp.android.ui.common.TurkishCities
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,6 +28,7 @@ fun CreateLeadScreen(
     var selectedCategory by remember { mutableStateOf(LawCategories.list[0]) }
     var city by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
+    var cityExpanded by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -61,13 +63,18 @@ fun CreateLeadScreen(
                 label = { Text("Hukuk Kategorisi") },
                 modifier = Modifier.fillMaxWidth(),
                 trailingIcon = {
-                    Icon(Icons.Default.ArrowDropDown, "dropdown", Modifier.clickable { expanded = true })
+                    Icon(Icons.Default.ArrowDropDown, "dropdown")
                 }
+            )
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clickable { expanded = true }
             )
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
-                modifier = Modifier.fillMaxWidth(0.8f)
+                modifier = Modifier.fillMaxWidth(0.8f).heightIn(max = 280.dp)
             ) {
                 LawCategories.list.forEach { category ->
                     DropdownMenuItem(
@@ -93,12 +100,43 @@ fun CreateLeadScreen(
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        OutlinedTextField(
-            value = city,
-            onValueChange = { city = it },
-            label = { Text("Şehir") },
-            modifier = Modifier.fillMaxWidth()
-        )
+        // Şehir Seçimi
+        Box(modifier = Modifier.fillMaxWidth()) {
+            OutlinedTextField(
+                value = if (city.isNotEmpty()) city else "Şehir Seçin",
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Şehir") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = if (city.isEmpty()) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                ),
+                trailingIcon = {
+                    Icon(Icons.Default.ArrowDropDown, "dropdown")
+                }
+            )
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clickable { cityExpanded = true }
+            )
+            DropdownMenu(
+                expanded = cityExpanded,
+                onDismissRequest = { cityExpanded = false },
+                modifier = Modifier.fillMaxWidth(0.8f).heightIn(max = 280.dp)
+            ) {
+                TurkishCities.list.forEach { TurkishCity ->
+                    DropdownMenuItem(
+                        text = { Text(TurkishCity) },
+                        onClick = {
+                            city = TurkishCity
+                            cityExpanded = false
+                        }
+                    )
+                }
+            }
+        }
         
         Spacer(modifier = Modifier.height(16.dp))
         
@@ -114,11 +152,14 @@ fun CreateLeadScreen(
         
         Button(
             onClick = { 
-                viewModel.createLead(title, description, selectedCategory, city) {
-                    onLeadCreated()
+                if (city.isNotEmpty()) {
+                    viewModel.createLead(title, description, selectedCategory, city) {
+                        onLeadCreated()
+                    }
                 }
             },
-            modifier = Modifier.fillMaxWidth().height(56.dp)
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            enabled = title.isNotBlank() && description.isNotBlank() && city.isNotEmpty()
         ) {
             Text("İlanı Yayınla", fontSize = 18.sp)
         }

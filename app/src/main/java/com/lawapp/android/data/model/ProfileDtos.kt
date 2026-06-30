@@ -12,7 +12,8 @@ data class LawyerProfile(
     val instagramUrl: String? = null,
     val websiteUrl: String? = null,
     val fullName: String? = null,
-    val specialties: List<String> = emptyList()
+    val specialties: List<String> = emptyList(),
+    val city: String? = null
 )
 
 @Serializable
@@ -22,6 +23,7 @@ data class ProfileUpdateDto(
     val instagramUrl: String,
     val websiteUrl: String,
     val youtubeUrl: String,
+    val city: String,
     val specialties: List<String>
 )
 

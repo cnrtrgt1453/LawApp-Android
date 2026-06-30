@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.lawapp.android.data.toFullUrl
+import com.lawapp.android.ui.common.TurkishCities
 import com.lawapp.android.ui.leads.LawCategories
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -45,7 +46,9 @@ fun LawyerProfileScreen(
     var websiteUrl by remember { mutableStateOf("") }
     var youtubeUrl by remember { mutableStateOf("") }
     var selectedSpecialties by remember { mutableStateOf<List<String>>(emptyList()) }
+    var city by remember { mutableStateOf("") }
     var isEditing by remember { mutableStateOf(false) }
+    var cityExpanded by remember { mutableStateOf(false) }
     
     // Profil yüklendiğinde alanları doldur
     LaunchedEffect(profile) {
@@ -56,6 +59,7 @@ fun LawyerProfileScreen(
             websiteUrl = it.websiteUrl ?: ""
             youtubeUrl = it.youtubeUrl ?: ""
             selectedSpecialties = it.specialties
+            city = it.city ?: ""
         }
     }
 
@@ -173,7 +177,7 @@ fun LawyerProfileScreen(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "Avukat Hesabı",
+                    text = "Avukat Hesabı" + (if (city.isNotEmpty()) " • $city" else ""),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.secondary
                 )
@@ -331,6 +335,50 @@ fun LawyerProfileScreen(
                         }
                     }
 
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Şehir Seçimi
+                    Text(
+                        "Bulunduğunuz Şehir",
+                        modifier = Modifier.align(Alignment.Start),
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        OutlinedTextField(
+                            value = if (city.isNotEmpty()) city else "Şehir Seçin",
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Şehir") },
+                            modifier = Modifier.fillMaxWidth(),
+                            trailingIcon = {
+                                Icon(Icons.Default.ArrowDropDown, "dropdown")
+                            }
+                        )
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .clickable { cityExpanded = true }
+                        )
+                        DropdownMenu(
+                            expanded = cityExpanded,
+                            onDismissRequest = { cityExpanded = false },
+                            modifier = Modifier.fillMaxWidth(0.8f).heightIn(max = 280.dp)
+                        ) {
+                            TurkishCities.list.forEach { TurkishCity ->
+                                DropdownMenuItem(
+                                    text = { Text(TurkishCity) },
+                                    onClick = {
+                                        city = TurkishCity
+                                        cityExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
                     Spacer(modifier = Modifier.height(24.dp))
 
                     Text(
@@ -395,6 +443,7 @@ fun LawyerProfileScreen(
                                 websiteUrl = profile?.websiteUrl ?: ""
                                 youtubeUrl = profile?.youtubeUrl ?: ""
                                 selectedSpecialties = profile?.specialties ?: emptyList()
+                                city = profile?.city ?: ""
                                 selectedImageUri = null
                                 isEditing = false 
                             },
@@ -406,7 +455,7 @@ fun LawyerProfileScreen(
 
                         Button(
                             onClick = { 
-                                viewModel.updateProfile(bio, linkedinUrl, instagramUrl, websiteUrl, youtubeUrl, selectedSpecialties)
+                                viewModel.updateProfile(bio, linkedinUrl, instagramUrl, websiteUrl, youtubeUrl, city, selectedSpecialties)
                                 isEditing = false
                             },
                             modifier = Modifier.weight(1f),
