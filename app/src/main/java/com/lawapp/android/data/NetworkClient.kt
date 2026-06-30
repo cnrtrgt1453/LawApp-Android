@@ -30,3 +30,10 @@ object NetworkClient {
     
     val BASE_URL = if (IS_SECURE) "https://$HOST/api" else "http://$HOST:$PORT/api"
 }
+
+fun String?.toFullUrl(): String? {
+    if (this == null) return null
+    if (this.startsWith("http://") || this.startsWith("https://")) return this
+    val base = NetworkClient.BASE_URL.substringBefore("/api")
+    return "$base$this"
+}

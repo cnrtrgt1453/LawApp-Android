@@ -24,6 +24,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.lawapp.android.data.model.ClientProfile
 import com.lawapp.android.ui.theme.LawAppTheme
 import coil.compose.AsyncImage
+import com.lawapp.android.data.toFullUrl
 
 @Composable
 fun ClientProfileScreen(
@@ -113,7 +114,7 @@ fun ClientProfileScreenContent(
                             .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape),
                         color = MaterialTheme.colorScheme.surfaceVariant
                     ) {
-                        val imageModel = selectedImageUri ?: profile?.profileImageUrl
+                        val imageModel = selectedImageUri ?: profile?.profileImageUrl.toFullUrl()
                         if (imageModel != null) {
                             AsyncImage(
                                 model = imageModel,
