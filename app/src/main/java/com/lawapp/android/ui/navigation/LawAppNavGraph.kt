@@ -51,7 +51,7 @@ data class BottomNavItem(
 )
 
 val lawyerBottomNavItems = listOf(
-    BottomNavItem("Randevular", Icons.Default.DateRange, Routes.LAWYER_HOME),
+    BottomNavItem("Randevu", Icons.Default.DateRange, Routes.LAWYER_HOME),
     BottomNavItem("Takvimim", Icons.Default.CalendarMonth, Routes.CALENDAR),
     BottomNavItem("Mesajlar", Icons.Default.Chat, Routes.CHAT_LIST),
     BottomNavItem("Cüzdan", Icons.Default.AccountBalanceWallet, Routes.WALLET),
@@ -61,7 +61,7 @@ val lawyerBottomNavItems = listOf(
 val clientBottomNavItems = listOf(
     BottomNavItem("İlanlarım", Icons.Default.List, Routes.CLIENT_HOME),
     BottomNavItem("Yeni İlan", Icons.Default.Add, Routes.CREATE_LEAD),
-    BottomNavItem("Randevular", Icons.Default.DateRange, Routes.CLIENT_APPOINTMENTS),
+    BottomNavItem("Randevu", Icons.Default.DateRange, Routes.CLIENT_APPOINTMENTS),
     BottomNavItem("Mesajlar", Icons.Default.Chat, Routes.CHAT_LIST),
     BottomNavItem("Profil", Icons.Default.Person, Routes.CLIENT_PROFILE)
 )
