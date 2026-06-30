@@ -7,10 +7,12 @@ data class LawyerProfile(
     val id: Long? = null,
     val bio: String? = null,
     val profileImageUrl: String? = null,
-    val introVideoUrl: String? = null,
+    val youtubeUrl: String? = null,
     val linkedinUrl: String? = null,
     val instagramUrl: String? = null,
-    val websiteUrl: String? = null
+    val websiteUrl: String? = null,
+    val fullName: String? = null,
+    val specialties: List<String> = emptyList()
 )
 
 @Serializable
@@ -18,12 +20,15 @@ data class ProfileUpdateDto(
     val bio: String,
     val linkedinUrl: String,
     val instagramUrl: String,
-    val websiteUrl: String
+    val websiteUrl: String,
+    val youtubeUrl: String,
+    val specialties: List<String>
 )
 
 @Serializable
 data class ClientProfile(
     val id: Long? = null,
     val bio: String? = null,
-    val profileImageUrl: String? = null
+    val profileImageUrl: String? = null,
+    val fullName: String? = null
 )

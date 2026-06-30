@@ -12,12 +12,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.PlayCircleOutline
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -194,43 +192,45 @@ fun LawyerDetailsContent(
                     }
                 }
 
-                // Tanıtım Videosu Kartı (Eğer varsa veya Mock olarak gösterilecekse)
+                // Sosyal Medya ve Web Bağlantıları Kartı
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp)
                 ) {
+                    val uriHandler = LocalUriHandler.current
+                    fun openLink(url: String) {
+                        if (url.isBlank()) return
+                        val formattedUrl = if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                            "https://$url"
+                        } else {
+                            url
+                        }
+                        try {
+                            uriHandler.openUri(formattedUrl)
+                        } catch (e: Exception) {
+                            // ignore
+                        }
+                    }
+
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "Tanıtım Videosu",
+                            text = "İletişim ve Sosyal Medya",
                             fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.primary
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         
-                        // Video Player Placeholder
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(160.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color.Black),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(
-                                    imageVector = Icons.Default.PlayCircleOutline,
-                                    contentDescription = "Oynat",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(48.dp)
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = if (lawyer.introVideoUrl != null) "Tanıtım Videosunu Oynat" else "Tanıtım Videosu Yüklenmemiş",
-                                    color = Color.White,
-                                    fontSize = 13.sp
-                                )
-                            }
-                        }
+                        SocialDetailLinkRow("LinkedIn", lawyer.linkedinUrl, Icons.Default.Share) { openLink(lawyer.linkedinUrl ?: "") }
+                        Divider(modifier = Modifier.padding(vertical = 8.dp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                        
+                        SocialDetailLinkRow("Instagram", lawyer.instagramUrl, Icons.Default.Share) { openLink(lawyer.instagramUrl ?: "") }
+                        Divider(modifier = Modifier.padding(vertical = 8.dp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                        
+                        SocialDetailLinkRow("YouTube", lawyer.youtubeUrl, Icons.Default.Share) { openLink(lawyer.youtubeUrl ?: "") }
+                        Divider(modifier = Modifier.padding(vertical = 8.dp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                        
+                        SocialDetailLinkRow("Kişisel Web Sitesi", lawyer.websiteUrl, Icons.Default.Language) { openLink(lawyer.websiteUrl ?: "") }
                     }
                 }
 
@@ -417,5 +417,42 @@ fun LawyerDetailsPreview() {
             onSlotSelected = {},
             onBackClick = {}
         )
+    }
+}
+
+@Composable
+fun SocialDetailLinkRow(
+    label: String,
+    url: String?,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(enabled = !url.isNullOrBlank()) { onClick() }
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = if (!url.isNullOrBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Column {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.secondary
+            )
+            Text(
+                text = if (!url.isNullOrBlank()) url else "Eklenmedi",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    textDecoration = if (!url.isNullOrBlank()) TextDecoration.Underline else TextDecoration.None
+                ),
+                color = if (!url.isNullOrBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+            )
+        }
     }
 }

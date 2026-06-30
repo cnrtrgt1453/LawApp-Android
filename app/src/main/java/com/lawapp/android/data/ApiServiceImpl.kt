@@ -169,19 +169,4 @@ class ApiServiceImpl @Inject constructor() : ApiService {
         }
         return response.body()
     }
-
-    override suspend fun uploadIntroVideo(bytes: ByteArray, fileName: String): String {
-        val response = client.post("$baseUrl/profile/upload-video") {
-            auth()
-            setBody(MultiPartFormDataContent(
-                formData {
-                    append("file", bytes, Headers.build {
-                        append(HttpHeaders.ContentType, "video/mp4")
-                        append(HttpHeaders.ContentDisposition, "filename=\"$fileName\"")
-                    })
-                }
-            ))
-        }
-        return response.body()
-    }
 }

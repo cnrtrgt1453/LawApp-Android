@@ -46,11 +46,11 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun updateProfile(bio: String, linkedin: String, instagram: String, website: String) {
+    fun updateProfile(bio: String, linkedin: String, instagram: String, website: String, youtube: String, specialties: List<String>) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val dto = ProfileUpdateDto(bio, linkedin, instagram, website)
+                val dto = ProfileUpdateDto(bio, linkedin, instagram, website, youtube, specialties)
                 _profile.value = apiService.updateLawyerProfile(dto)
             } catch (e: Exception) {
                 _error.value = "Güncelleme başarısız: ${e.localizedMessage}"
@@ -74,26 +74,6 @@ class ProfileViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 _error.value = "Fotoğraf yüklenemedi: ${e.localizedMessage}"
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
-
-    fun uploadIntroVideo(uri: Uri) {
-        viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
-                if (bytes != null) {
-                    val fileName = "intro_${System.currentTimeMillis()}.mp4"
-                    val videoUrl = apiService.uploadIntroVideo(bytes, fileName)
-                    _profile.value = _profile.value?.copy(introVideoUrl = videoUrl)
-                } else {
-                    _error.value = "Video okunamadı."
-                }
-            } catch (e: Exception) {
-                _error.value = "Video yüklenemedi: ${e.localizedMessage}"
             } finally {
                 _isLoading.value = false
             }

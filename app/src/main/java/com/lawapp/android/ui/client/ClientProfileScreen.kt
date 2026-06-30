@@ -57,6 +57,7 @@ fun ClientProfileScreenContent(
 ) {
     var bio by remember { mutableStateOf("") }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var isEditing by remember { mutableStateOf(false) }
 
     LaunchedEffect(profile) {
         profile?.let {
@@ -77,7 +78,7 @@ fun ClientProfileScreenContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Profilimi Düzenle") },
+                title = { Text(if (isEditing) "Profili Düzenle" else "Profilim") },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -102,7 +103,7 @@ fun ClientProfileScreenContent(
                     Text(text = it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(8.dp))
                 }
 
-                // Profil Fotoğrafı
+                // Profil Fotoğrafı Bölümü
                 Box(
                     contentAlignment = Alignment.BottomEnd,
                     modifier = Modifier.size(140.dp)
@@ -132,47 +133,116 @@ fun ClientProfileScreenContent(
                         }
                     }
                     
-                    IconButton(
-                        onClick = {
-                            photoPickerLauncher.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    if (isEditing) {
+                        IconButton(
+                            onClick = {
+                                photoPickerLauncher.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                )
+                            },
+                            modifier = Modifier.size(40.dp),
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = Color.White
                             )
-                        },
-                        modifier = Modifier.size(40.dp),
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = Color.White
-                        )
-                    ) {
-                        Icon(Icons.Default.AddAPhoto, contentDescription = "Fotoğraf Değiştir", modifier = Modifier.size(20.dp))
+                        ) {
+                            Icon(Icons.Default.AddAPhoto, contentDescription = "Fotoğraf Değiştir", modifier = Modifier.size(20.dp))
+                        }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                // Biyografi
-                OutlinedTextField(
-                    value = bio,
-                    onValueChange = { bio = it },
-                    label = { Text("Hakkımda") },
-                    placeholder = { Text("Kendinizden kısaca bahsedin...") },
-                    modifier = Modifier.fillMaxWidth(),
-                    minLines = 4,
-                    maxLines = 8
+                // İsim ve Soyisim
+                Text(
+                    text = profile?.fullName ?: "Müvekkil",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "Müvekkil Hesabı",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.secondary
                 )
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                Button(
-                    onClick = { onUpdateProfile(bio) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.medium,
-                    enabled = !isLoading
-                ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
-                    } else {
-                        Text("Bilgileri Güncelle", fontSize = 16.sp, modifier = Modifier.padding(8.dp))
+                if (!isEditing) {
+                    // --- GÖRÜNTÜLEME MODU (VIEW MODE) ---
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        ),
+                        shape = MaterialTheme.shapes.medium
+                    ) {
+                        Column(modifier = Modifier.padding(20.dp)) {
+                            Text(
+                                text = "Hakkımda",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = if (bio.isNotEmpty()) bio else "Kendiniz hakkında henüz bilgi girmediniz.",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    Button(
+                        onClick = { isEditing = true },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.medium
+                    ) {
+                        Text("Profili Düzenle", fontSize = 16.sp, modifier = Modifier.padding(8.dp))
+                    }
+                } else {
+                    // --- DÜZENLEME MODU (EDIT MODE) ---
+                    OutlinedTextField(
+                        value = bio,
+                        onValueChange = { bio = it },
+                        label = { Text("Hakkımda") },
+                        placeholder = { Text("Kendinizden kısaca bahsedin...") },
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 4,
+                        maxLines = 8
+                    )
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = { 
+                                bio = profile?.bio ?: ""
+                                selectedImageUri = null
+                                isEditing = false 
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = MaterialTheme.shapes.medium
+                        ) {
+                            Text("İptal", fontSize = 16.sp, modifier = Modifier.padding(8.dp))
+                        }
+
+                        Button(
+                            onClick = { 
+                                onUpdateProfile(bio)
+                                isEditing = false
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = MaterialTheme.shapes.medium,
+                            enabled = !isLoading
+                        ) {
+                            Text("Kaydet", fontSize = 16.sp, modifier = Modifier.padding(8.dp))
+                        }
                     }
                 }
                 

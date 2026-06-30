@@ -104,5 +104,8 @@ data class LawyerDto(
     val verified: Boolean = false,
     val bio: String? = null,
     val profileImageUrl: String? = null,
-    val introVideoUrl: String? = null
+    val youtubeUrl: String? = null,
+    val linkedinUrl: String? = null,
+    val instagramUrl: String? = null,
+    val websiteUrl: String? = null
 )
