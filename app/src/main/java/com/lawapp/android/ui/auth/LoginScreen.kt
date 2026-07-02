@@ -55,6 +55,7 @@ fun LoginScreenContent(
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var showErrorDialog by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     val scope = rememberCoroutineScope()
@@ -65,9 +66,26 @@ fun LoginScreenContent(
 
     LaunchedEffect(error) {
         error?.let {
-            scope.launch { snackbarHostState.showSnackbar(it) }
+            if (it.contains("Giriş başarısız")) {
+                showErrorDialog = true
+            } else {
+                scope.launch { snackbarHostState.showSnackbar(it) }
+            }
             onClearError()
         }
+    }
+
+    if (showErrorDialog) {
+        AlertDialog(
+            onDismissRequest = { showErrorDialog = false },
+            title = { Text("Hata") },
+            text = { Text("Kullanıcı adı ve şifre hatalıdır.") },
+            confirmButton = {
+                TextButton(onClick = { showErrorDialog = false }) {
+                    Text("Tamam")
+                }
+            }
+        )
     }
 
     Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { padding ->
