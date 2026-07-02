@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 import com.lawapp.android.ui.client.ClientViewModel
+import com.lawapp.android.ui.common.CityPickerDialog
 import com.lawapp.android.ui.common.TurkishCities
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -121,21 +122,16 @@ fun CreateLeadScreen(
                     .matchParentSize()
                     .clickable { cityExpanded = true }
             )
-            DropdownMenu(
-                expanded = cityExpanded,
+        }
+        
+        if (cityExpanded) {
+            CityPickerDialog(
                 onDismissRequest = { cityExpanded = false },
-                modifier = Modifier.fillMaxWidth(0.8f).heightIn(max = 280.dp)
-            ) {
-                TurkishCities.list.forEach { TurkishCity ->
-                    DropdownMenuItem(
-                        text = { Text(TurkishCity) },
-                        onClick = {
-                            city = TurkishCity
-                            cityExpanded = false
-                        }
-                    )
+                onCitySelected = { selectedCity ->
+                    city = selectedCity
+                    cityExpanded = false
                 }
-            }
+            )
         }
         
         Spacer(modifier = Modifier.height(16.dp))
