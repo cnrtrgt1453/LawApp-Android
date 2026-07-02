@@ -14,6 +14,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lawapp.android.R
 import com.lawapp.android.ui.theme.LawAppTheme
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 
@@ -76,16 +78,69 @@ fun LoginScreenContent(
     }
 
     if (showErrorDialog) {
-        AlertDialog(
-            onDismissRequest = { showErrorDialog = false },
-            title = { Text("Hata") },
-            text = { Text("Kullanıcı adı ve şifre hatalıdır.") },
-            confirmButton = {
-                TextButton(onClick = { showErrorDialog = false }) {
-                    Text("Tamam")
+        Dialog(onDismissRequest = { showErrorDialog = false }) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                shape = MaterialTheme.shapes.large,
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Başlık Bandı (Lacivert zemin)
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.primary
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Hata",
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            )
+                        }
+                    }
+
+                    // Hata Mesajı
+                    Text(
+                        text = "Kullanıcı adı ve şifre hatalıdır.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp),
+                        textAlign = TextAlign.Center
+                    )
+
+                    // Tamam Butonu (Ortalanmış ve lacivert)
+                    Button(
+                        onClick = { showErrorDialog = false },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = Color.White
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth(0.5f)
+                            .padding(bottom = 20.dp),
+                        shape = MaterialTheme.shapes.medium
+                    ) {
+                        Text(
+                            text = "Tamam",
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
+                    }
                 }
             }
-        )
+        }
     }
 
     Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { padding ->
