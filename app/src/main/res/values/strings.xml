@@ -2,8 +2,8 @@
     <string name="app_name">LawApp</string>
     
     <!-- Google ve Facebook Giriş Kimlik Bilgileri (Burayı güncelleyin) -->
-    <string name="google_web_client_id">YOUR_GOOGLE_WEB_CLIENT_ID.apps.googleusercontent.com</string>
-    <string name="facebook_app_id">YOUR_FACEBOOK_APP_ID</string>
-    <string name="facebook_client_token">YOUR_FACEBOOK_CLIENT_TOKEN</string>
-    <string name="fb_login_protocol_scheme">fbYOUR_FACEBOOK_APP_ID</string>
+    <string name="google_web_client_id">460113673310-stasq331spfsehqri5ibf64dlp1s1fll.apps.googleusercontent.com</string>
+    <string name="facebook_app_id">1591522735906987</string>
+    <string name="facebook_client_token">14ffc05fd2a2cc60b9f12becb48e5b2d</string>
+    <string name="fb_login_protocol_scheme">fb1591522735906987</string>
 </resources>
