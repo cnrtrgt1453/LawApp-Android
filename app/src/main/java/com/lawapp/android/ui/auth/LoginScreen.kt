@@ -112,7 +112,7 @@ fun LoginScreenContent(
     val loginManager = remember { LoginManager.getInstance() }
     
     val facebookLoginLauncher = rememberLauncherForActivityResult(
-        contract = loginManager.createActivityResultContract(callbackManager),
+        contract = loginManager.createLogInActivityResultContract(callbackManager),
         onResult = { /* Managed by CallbackManager */ }
     )
 
