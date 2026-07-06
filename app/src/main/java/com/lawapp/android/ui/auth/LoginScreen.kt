@@ -18,6 +18,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
+import androidx.activity.compose.rememberLauncherForActivityResult
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.facebook.CallbackManager
+import com.facebook.FacebookCallback
+import com.facebook.FacebookException
+import com.facebook.login.LoginManager
+import com.facebook.login.LoginResult
 
 @Composable
 fun LoginScreen(
@@ -61,6 +70,78 @@ fun LoginScreenContent(
     val snackbarHostState = remember { SnackbarHostState() }
 
     val scope = rememberCoroutineScope()
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    // --- GOOGLE SIGN IN ---
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
+        onResult = { result ->
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                val idToken = account?.idToken
+                if (!idToken.isNullOrEmpty()) {
+                    onLoginWithGoogle(idToken)
+                } else {
+                    scope.launch { snackbarHostState.showSnackbar("Google kimlik doğrulaması başarısız.") }
+                }
+            } catch (e: ApiException) {
+                scope.launch { snackbarHostState.showSnackbar("Google Giriş Hatası: ${e.localizedMessage}") }
+            }
+        }
+    )
+
+    fun startGoogleSignIn() {
+        val webClientId = context.getString(R.string.google_web_client_id)
+        if (webClientId == "YOUR_GOOGLE_WEB_CLIENT_ID.apps.googleusercontent.com") {
+            scope.launch { snackbarHostState.showSnackbar("Lütfen strings.xml dosyasındaki google_web_client_id değerini güncelleyin.") }
+            return
+        }
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestEmail()
+            .requestIdToken(webClientId)
+            .build()
+        val googleSignInClient = GoogleSignIn.getClient(context, gso)
+        googleSignInClient.signOut().addOnCompleteListener {
+            googleSignInLauncher.launch(googleSignInClient.signInIntent)
+        }
+    }
+
+    // --- FACEBOOK LOGIN ---
+    val callbackManager = remember { CallbackManager.Factory.create() }
+    val loginManager = remember { LoginManager.getInstance() }
+    
+    val facebookLoginLauncher = rememberLauncherForActivityResult(
+        contract = loginManager.createActivityResultContract(callbackManager),
+        onResult = { /* Managed by CallbackManager */ }
+    )
+
+    DisposableEffect(Unit) {
+        loginManager.registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
+            override fun onSuccess(result: LoginResult) {
+                val token = result.accessToken.token
+                onLoginWithFacebook(token)
+            }
+            override fun onCancel() {
+                scope.launch { snackbarHostState.showSnackbar("Facebook girişi iptal edildi.") }
+            }
+            override fun onError(error: FacebookException) {
+                scope.launch { snackbarHostState.showSnackbar("Facebook Giriş Hatası: ${error.localizedMessage}") }
+            }
+        })
+        onDispose {
+            loginManager.unregisterCallback(callbackManager)
+        }
+    }
+
+    fun startFacebookSignIn() {
+        val facebookAppId = context.getString(R.string.facebook_app_id)
+        if (facebookAppId == "YOUR_FACEBOOK_APP_ID") {
+            scope.launch { snackbarHostState.showSnackbar("Lütfen strings.xml dosyasındaki facebook_app_id değerini güncelleyin.") }
+            return
+        }
+        facebookLoginLauncher.launch(listOf("public_profile", "email"))
+    }
 
     LaunchedEffect(loginSuccess) {
         if (loginSuccess) onLoginSuccess()
@@ -205,7 +286,7 @@ fun LoginScreenContent(
 
             // --- SOSYAL MEDYA GİRİŞ BUTONLARI ---
             Button(
-                onClick = { onLoginWithGoogle("mock-google-token") },
+                onClick = { startGoogleSignIn() },
                 modifier = Modifier.fillMaxWidth().height(50.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF1F1F1), contentColor = Color.Black),
                 shape = MaterialTheme.shapes.medium,
@@ -229,7 +310,7 @@ fun LoginScreenContent(
             Spacer(modifier = Modifier.height(12.dp))
 
             Button(
-                onClick = { onLoginWithFacebook("mock-facebook-token") },
+                onClick = { startFacebookSignIn() },
                 modifier = Modifier.fillMaxWidth().height(50.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1877F2), contentColor = Color.White),
                 shape = MaterialTheme.shapes.medium,
