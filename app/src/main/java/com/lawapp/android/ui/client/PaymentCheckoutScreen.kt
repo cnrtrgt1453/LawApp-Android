@@ -80,7 +80,7 @@ fun PaymentCheckoutContent(
         slotTime
     }
 
-    val platformFee = 250.0 // Sabit platform kullanım ücreti simülasyonu
+    val platformFee = 100.0 // Sabit platform kullanım ücreti simülasyonu
 
     val scrollState = rememberScrollState()
 
