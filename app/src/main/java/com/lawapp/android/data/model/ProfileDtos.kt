@@ -18,6 +18,7 @@ data class LawyerProfile(
 
 @Serializable
 data class ProfileUpdateDto(
+    val fullName: String,
     val bio: String,
     val linkedinUrl: String,
     val instagramUrl: String,
@@ -25,6 +26,12 @@ data class ProfileUpdateDto(
     val youtubeUrl: String,
     val city: String,
     val specialties: List<String>
+)
+
+@Serializable
+data class ClientProfileUpdateDto(
+    val fullName: String,
+    val bio: String
 )
 
 @Serializable

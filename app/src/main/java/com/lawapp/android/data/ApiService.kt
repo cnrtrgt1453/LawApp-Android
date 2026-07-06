@@ -20,7 +20,7 @@ interface ApiService {
     suspend fun getLawyerProfile(): LawyerProfile
     suspend fun updateLawyerProfile(dto: ProfileUpdateDto): LawyerProfile
     suspend fun getClientProfile(): ClientProfile
-    suspend fun updateClientProfile(bio: String): ClientProfile
+    suspend fun updateClientProfile(dto: ClientProfileUpdateDto): ClientProfile
     suspend fun uploadProfileImage(bytes: ByteArray, fileName: String): String
     suspend fun getChatSessions(): List<ChatSessionDto>
     suspend fun getChatMessages(sessionId: Long): List<ChatMessageDto>

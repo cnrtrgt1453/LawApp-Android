@@ -132,11 +132,11 @@ class ApiServiceImpl @Inject constructor() : ApiService {
         return response.body()
     }
 
-    override suspend fun updateClientProfile(bio: String): ClientProfile {
+    override suspend fun updateClientProfile(dto: ClientProfileUpdateDto): ClientProfile {
         val response = client.put("$baseUrl/profile/client") {
             auth()
-            contentType(ContentType.Text.Plain)
-            setBody(bio)
+            contentType(ContentType.Application.Json)
+            setBody(dto)
         }
         return response.body()
     }

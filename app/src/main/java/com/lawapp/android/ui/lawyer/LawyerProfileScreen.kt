@@ -41,6 +41,7 @@ fun LawyerProfileScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
 
+    var fullName by remember { mutableStateOf("") }
     var bio by remember { mutableStateOf("") }
     var linkedinUrl by remember { mutableStateOf("") }
     var instagramUrl by remember { mutableStateOf("") }
@@ -54,6 +55,7 @@ fun LawyerProfileScreen(
     // Profil yüklendiğinde alanları doldur
     LaunchedEffect(profile) {
         profile?.let {
+            fullName = it.fullName ?: ""
             bio = it.bio ?: ""
             linkedinUrl = it.linkedinUrl ?: ""
             instagramUrl = it.instagramUrl ?: ""
@@ -292,6 +294,16 @@ fun LawyerProfileScreen(
                 } else {
                     // --- DÜZENLEME MODU (EDIT MODE) ---
                     OutlinedTextField(
+                        value = fullName,
+                        onValueChange = { fullName = it },
+                        label = { Text("İsim Soyisim") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedTextField(
                         value = bio,
                         onValueChange = { bio = it },
                         label = { Text("Hakkımda (Biyografi)") },
@@ -433,6 +445,7 @@ fun LawyerProfileScreen(
                         OutlinedButton(
                             onClick = { 
                                 // Reset fields to current profile
+                                fullName = profile?.fullName ?: ""
                                 bio = profile?.bio ?: ""
                                 linkedinUrl = profile?.linkedinUrl ?: ""
                                 instagramUrl = profile?.instagramUrl ?: ""
@@ -451,7 +464,7 @@ fun LawyerProfileScreen(
 
                         Button(
                             onClick = { 
-                                viewModel.updateProfile(bio, linkedinUrl, instagramUrl, websiteUrl, youtubeUrl, city, selectedSpecialties)
+                                viewModel.updateProfile(fullName, bio, linkedinUrl, instagramUrl, websiteUrl, youtubeUrl, city, selectedSpecialties)
                                 isEditing = false
                             },
                             modifier = Modifier.weight(1f),

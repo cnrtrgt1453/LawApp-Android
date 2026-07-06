@@ -46,11 +46,11 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun updateProfile(bio: String, linkedin: String, instagram: String, website: String, youtube: String, city: String, specialties: List<String>) {
+    fun updateProfile(fullName: String, bio: String, linkedin: String, instagram: String, website: String, youtube: String, city: String, specialties: List<String>) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val dto = ProfileUpdateDto(bio, linkedin, instagram, website, youtube, city, specialties)
+                val dto = ProfileUpdateDto(fullName, bio, linkedin, instagram, website, youtube, city, specialties)
                 _profile.value = apiService.updateLawyerProfile(dto)
             } catch (e: Exception) {
                 _error.value = "Güncelleme başarısız: ${e.localizedMessage}"

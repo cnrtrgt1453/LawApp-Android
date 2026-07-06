@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lawapp.android.data.ApiService
 import com.lawapp.android.data.model.ClientProfile
+import com.lawapp.android.data.model.ClientProfileUpdateDto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,11 +46,12 @@ class ClientProfileViewModel @Inject constructor(
         }
     }
 
-    fun updateProfile(bio: String) {
+    fun updateProfile(fullName: String, bio: String) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                _profile.value = apiService.updateClientProfile(bio)
+                val dto = ClientProfileUpdateDto(fullName, bio)
+                _profile.value = apiService.updateClientProfile(dto)
             } catch (e: Exception) {
                 _error.value = "Güncelleme başarısız: ${e.localizedMessage}"
             } finally {

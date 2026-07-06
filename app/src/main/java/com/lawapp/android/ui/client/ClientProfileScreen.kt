@@ -39,7 +39,7 @@ fun ClientProfileScreen(
         profile = profile,
         isLoading = isLoading,
         error = error,
-        onUpdateProfile = { bio -> viewModel.updateProfile(bio) },
+        onUpdateProfile = { fullName, bio -> viewModel.updateProfile(fullName, bio) },
         onUploadPhoto = { uri -> viewModel.uploadProfileImage(uri) },
         onLogout = onLogout
     )
@@ -51,16 +51,18 @@ fun ClientProfileScreenContent(
     profile: ClientProfile?,
     isLoading: Boolean,
     error: String?,
-    onUpdateProfile: (String) -> Unit,
+    onUpdateProfile: (String, String) -> Unit,
     onUploadPhoto: (Uri) -> Unit,
     onLogout: () -> Unit = {}
 ) {
+    var fullName by remember { mutableStateOf("") }
     var bio by remember { mutableStateOf("") }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var isEditing by remember { mutableStateOf(false) }
 
     LaunchedEffect(profile) {
         profile?.let {
+            fullName = it.fullName ?: ""
             bio = it.bio ?: ""
         }
     }
@@ -205,6 +207,16 @@ fun ClientProfileScreenContent(
                 } else {
                     // --- DÜZENLEME MODU (EDIT MODE) ---
                     OutlinedTextField(
+                        value = fullName,
+                        onValueChange = { fullName = it },
+                        label = { Text("İsim Soyisim") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedTextField(
                         value = bio,
                         onValueChange = { bio = it },
                         label = { Text("Hakkımda") },
@@ -222,6 +234,7 @@ fun ClientProfileScreenContent(
                     ) {
                         OutlinedButton(
                             onClick = { 
+                                fullName = profile?.fullName ?: ""
                                 bio = profile?.bio ?: ""
                                 selectedImageUri = null
                                 isEditing = false 
@@ -234,7 +247,7 @@ fun ClientProfileScreenContent(
 
                         Button(
                             onClick = { 
-                                onUpdateProfile(bio)
+                                onUpdateProfile(fullName, bio)
                                 isEditing = false
                             },
                             modifier = Modifier.weight(1f),
@@ -281,7 +294,7 @@ fun ClientProfileScreenPreview() {
             ),
             isLoading = false,
             error = null,
-            onUpdateProfile = {},
+            onUpdateProfile = { _, _ -> },
             onUploadPhoto = {}
         )
     }
