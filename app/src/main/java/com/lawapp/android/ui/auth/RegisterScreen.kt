@@ -64,10 +64,35 @@ fun RegisterScreen(
             onFullNameChange = { fullName = it },
             onEmailChange = { email = it },
             onPasswordChange = { password = it },
-            onPhoneChange = { phone = it },
+            onPhoneChange = { input ->
+                var digits = input.filter { it.isDigit() }
+                if (digits.isNotEmpty()) {
+                    if (digits.first() != '0') {
+                        digits = "0$digits"
+                    }
+                }
+                val limitedDigits = if (digits.length > 11) digits.take(11) else digits
+                val formatted = when {
+                    limitedDigits.isEmpty() -> ""
+                    limitedDigits.length == 1 -> "0"
+                    limitedDigits.length <= 4 -> {
+                        val area = limitedDigits.substring(1)
+                        "0($area"
+                    }
+                    else -> {
+                        val area = limitedDigits.substring(1, 4)
+                        val rest = limitedDigits.substring(4)
+                        "0($area) ($rest)"
+                    }
+                }
+                phone = formatted
+            },
             onRegisterClick = {
+                val cleanedPhone = phone.filter { it.isDigit() }
                 if (fullName.isBlank() || email.isBlank() || password.isBlank() || phone.isBlank()) {
                     scope.launch { snackbarHostState.showSnackbar("Lütfen tüm alanları doldurun.") }
+                } else if (cleanedPhone.length != 11 || !cleanedPhone.startsWith("0")) {
+                    scope.launch { snackbarHostState.showSnackbar("Lütfen geçerli bir telefon numarası girin.") }
                 } else {
                     viewModel.register(fullName, email, password, phone, selectedRole)
                 }
