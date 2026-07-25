@@ -3,11 +3,11 @@
     <domain-config>
         <!-- SSL Pinning: api.lawapp.com domaini için sertifika çivileme koruması -->
         <domain includeSubdomains="true">api.lawapp.com</domain>
+        <!-- 
         <pin-set expiration="2027-12-31">
-            <!-- Ana Sertifika Pin Değeri (SHA-256) -->
-            <pin digest="SHA-256">tarafınızca_uretilen_ana_sertifika_hash_degeri_aes256</pin>
-            <!-- Yedek Sertifika Pin Değeri (Backup Pin - Yenilemeler için Zorunlu) -->
-            <pin digest="SHA-256">tarafınızca_uretilen_yedek_sertifika_hash_degeri_aes256</pin>
+            <pin digest="SHA-256">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</pin>
+            <pin digest="SHA-256">BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=</pin>
         </pin-set>
+        -->
     </domain-config>
 </network-security-config>
